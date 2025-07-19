@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(grep:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(rg:*)",
+      "Bash(ls:*)",
+      "Bash(tsc:*)",
+      "Bash(bunx:*)",
+      "Bash(true)",
+      "Bash(rm:*)",
+      "Bash(find:*)",
+      "Bash(sed:*)",
+      "Bash(curl:*)",
+      "Bash(node:*)",
+      "Bash(tree:*)",
+      "Bash(pkill:*)",
+      "Bash(cp:*)",
+      "Bash(git stash show:*)",
+      "Bash(bun:*)"
+    ],
+    "deny": []
+  }
+}
