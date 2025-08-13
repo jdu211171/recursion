@@ -59,17 +59,17 @@ export default function DataTable<T>({ columns, rows, rowKey, onRowAction, selec
         alignItems: 'center',
         padding: '12px 16px',
         borderBottom: '1px solid var(--border)',
-        
+
         gap: 12
       }}>
         {headerContent}
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            strokeWidth={1.5} 
-            stroke="currentColor" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
             style={{
               position: 'absolute',
               left: 12,
@@ -87,7 +87,7 @@ export default function DataTable<T>({ columns, rows, rowKey, onRowAction, selec
             placeholder="Search..."
             value={query}
             onChange={e => setQuery(e.target.value)}
-            style={{ 
+            style={{
               width: 200,
               paddingLeft: 38
             }}
@@ -158,7 +158,7 @@ export default function DataTable<T>({ columns, rows, rowKey, onRowAction, selec
           alignItems: 'center',
           padding: '12px 16px',
           borderTop: '1px solid var(--border)',
-          
+
         }}>
           <div className="muted">{state.total} results</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -179,7 +179,7 @@ export default function DataTable<T>({ columns, rows, rowKey, onRowAction, selec
                 onChange={(e) => goToPage(Number(e.target.value) || 1)}
                 aria-label="Page number"
               />
-              <span>of {totalPages}</span>
+              <span>of&nbsp;{totalPages}</span>
             </div>
             <button className="btn" onClick={() => goToPage(state.pagination.page + 1)} aria-label="Next page" disabled={state.pagination.page >= totalPages}>Next</button>
           </div>
