@@ -11,13 +11,15 @@ interface TenantContextType {
   currentInstance: Instance | null
   setCurrentOrg: (org: Organization | null) => void
   setCurrentInstance: (instance: Instance | null) => void
+  refreshOrganizations: () => Promise<void>
+  refreshInstances: () => Promise<void>
 }
 
 const Ctx = createContext<TenantContextType | undefined>(undefined)
 
 export function TenantProvider({ children }: { children: ReactNode }) {
-  const [organizations] = useState<Organization[]>([])
-  const [instances] = useState<Instance[]>([])
+  const [organizations, setOrganizations] = useState<Organization[]>([])
+  const [instances, setInstances] = useState<Instance[]>([])
   const [currentOrg, setCurrentOrg] = useState<Organization | null>(null)
   const [currentInstance, setCurrentInstance] = useState<Instance | null>(null)
 
@@ -28,6 +30,8 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     currentInstance,
     setCurrentOrg,
     setCurrentInstance,
+    refreshOrganizations: async () => { setOrganizations([]) },
+    refreshInstances: async () => { setInstances([]) },
   }), [organizations, instances, currentOrg, currentInstance])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

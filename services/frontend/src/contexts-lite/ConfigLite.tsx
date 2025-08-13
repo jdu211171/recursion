@@ -8,7 +8,12 @@ export interface OrganizationConfig {
 
 interface ConfigContextType {
   config: OrganizationConfig | null
-  updateConfig: (next: Partial<OrganizationConfig>) => void
+  loading: boolean
+  error: string | null
+  refreshConfig: () => Promise<void>
+  updateConfig: (next: Partial<OrganizationConfig>) => Promise<void>
+  isFeatureEnabled: (name: string) => boolean
+  getCustomFields: (entityType: string) => Array<any>
 }
 
 const defaultConfig: OrganizationConfig = {
@@ -20,10 +25,19 @@ const Ctx = createContext<ConfigContextType | undefined>(undefined)
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<OrganizationConfig | null>(defaultConfig)
+  const [loading] = useState(false)
+  const [error] = useState<string | null>(null)
+
   const value = useMemo<ConfigContextType>(() => ({
     config,
-    updateConfig: (next) => setConfig(prev => ({ ...(prev ?? defaultConfig), ...next })),
-  }), [config])
+    loading,
+    error,
+    refreshConfig: async () => {},
+    updateConfig: async (next) => { setConfig(prev => ({ ...(prev ?? defaultConfig), ...next })) },
+    isFeatureEnabled: () => false,
+    getCustomFields: () => [],
+  }), [config, loading, error])
+
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 

@@ -23,5 +23,23 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": [
+    "src/main.tsx",
+    "src/App.tsx",
+    "src/index.css",
+    "src/vite-env.d.ts",
+    "src/components/layout/**/*.tsx",
+    "src/components/primitives/**/*.tsx",
+    "src/components/table/**/*.{ts,tsx}",
+    "src/components/forms/UnifiedForm.tsx",
+    "src/components/forms/ConfirmDialog.tsx",
+    "src/components/forms/CsvImportModal.tsx",
+    "src/components/filters/FilterPanel.tsx",
+    "src/contexts/AuthContext.tsx",
+    "src/contexts/ConfigContext.tsx",
+    "src/contexts/TenantContext.tsx",
+    "src/types/**/*.ts",
+    "src/pages/Overview.tsx",
+    "src/utils/**/*.ts"
+  ]
 }

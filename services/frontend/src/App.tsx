@@ -1,74 +1,155 @@
-import { CssBaseline } from '@mui/material'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Dashboard from './pages/Dashboard'
-import Analytics from './pages/Analytics'
-import FileManagement from './pages/FileManagement'
-import OrganizationSettings from './pages/OrganizationSettings'
-import MonitoringDashboard from './pages/MonitoringDashboard'
-import ProtectedRoute from './components/ProtectedRoute'
+import { useCallback, useMemo, useState } from 'react'
+import Header from './components/layout/Header'
+import type { EntityKey } from './components/layout/Toolbar'
+import ConsoleTable from './components/table/ConsoleTable'
+import Overview from './pages/Overview'
+import UnifiedForm, { type FieldMeta } from './components/forms/UnifiedForm'
+import CsvImportModal from './components/forms/CsvImportModal'
+import ConfirmDialog from './components/forms/ConfirmDialog'
+import Toast, { type ToastMessage } from './components/primitives/Toast'
 import { TenantProvider } from './contexts/TenantContext'
 import { ConfigProvider } from './contexts/ConfigContext'
-import { CustomThemeProvider } from './contexts/ThemeContext'
+// Note: Context providers will be reintroduced after MUI removal
 
-function App() {
+function AppShell() {
+  // Single-screen console; overview/settings may be added later in-page
+  const [entity, setEntity] = useState<EntityKey>('items')
+  const [showForm, setShowForm] = useState(false)
+  const [editRow, setEditRow] = useState<any | null>(null)
+  const [showCsv, setShowCsv] = useState(false)
+  const [toasts, setToasts] = useState<ToastMessage[]>([])
+  const [selectedIds, setSelectedIds] = useState<Array<string | number>>([])
+  const [confirm, setConfirm] = useState<{ open: boolean; action: 'borrow'|'return'|null; row?: any }>({ open: false, action: null })
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const addToast = useCallback((text: string, type: ToastMessage['type'] = 'info') => {
+    setToasts(ts => [...ts, { id: Math.random().toString(36).slice(2), text, type }])
+  }, [])
+
+  const fields: FieldMeta[] = useMemo(() => {
+    if (entity === 'users') return [
+      { name: 'name', label: 'Name', type: 'text', required: true },
+      { name: 'contact', label: 'Contact', type: 'text' },
+      { name: 'status', label: 'Status', type: 'select', options: [
+        { label: 'ACTIVE', value: 'ACTIVE' }, { label: 'INACTIVE', value: 'INACTIVE' },
+      ] },
+      { name: 'blacklistUntil', label: 'Blacklist Until', type: 'date' },
+    ]
+    if (entity === 'borrowings') return [
+      { name: 'itemId', label: 'Item', type: 'text', required: true },
+      { name: 'userId', label: 'User', type: 'text', required: true },
+      { name: 'startDate', label: 'Start', type: 'date', required: true },
+      { name: 'dueDate', label: 'Due', type: 'date', required: true },
+    ]
+    return [
+      { name: 'name', label: 'Name', type: 'text', required: true },
+      { name: 'totalCount', label: 'Total', type: 'number', required: true },
+      { name: 'availableCount', label: 'Available', type: 'number', required: true },
+      { name: 'status', label: 'Status', type: 'select', options: [
+        { label: 'AVAILABLE', value: 'AVAILABLE' }, { label: 'LOW', value: 'LOW' }, { label: 'OUT', value: 'OUT' },
+      ] },
+    ]
+  }, [entity])
+
   return (
-    <BrowserRouter>
-      <TenantProvider>
-        <ConfigProvider>
-          <CustomThemeProvider>
-            <CssBaseline />
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/analytics"
-                element={
-                  <ProtectedRoute>
-                    <Analytics />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/files"
-                element={
-                  <ProtectedRoute>
-                    <FileManagement />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute>
-                    <OrganizationSettings />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/monitoring"
-                element={
-                  <ProtectedRoute>
-                    <MonitoringDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-          </CustomThemeProvider>
-        </ConfigProvider>
-      </TenantProvider>
-    </BrowserRouter>
+    <div className="app-shell">
+      <Header />
+
+      <main className="content">
+        <Overview />
+        <section aria-label="Console">
+          <ConsoleTable
+            entity={entity}
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
+            onEdit={(row) => { setEditRow(row); setShowForm(true) }}
+            onDelete={() => addToast('Deleted', 'success')}
+            onBorrow={(row) => setConfirm({ open: true, action: 'borrow', row })}
+            onReturn={(row) => setConfirm({ open: true, action: 'return', row })}
+            headerContent={
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <label className="muted" htmlFor="entity">Entity</label>
+                    <select id="entity" className="select" value={entity} onChange={(e) => setEntity(e.target.value as EntityKey)}>
+                      <option value="items">Items</option>
+                      <option value="users">Users</option>
+                      <option value="borrowings">Borrowings</option>
+                    </select>
+                  </div>
+                  {(entity === 'items' || entity === 'users') && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <label className="muted" htmlFor="status">Status</label>
+                      <select id="status" className="select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                        <option value="">All</option>
+                        {entity === 'items' && (<>
+                          <option value="AVAILABLE">AVAILABLE</option>
+                          <option value="LOW">LOW</option>
+                          <option value="OUT">OUT</option>
+                        </>)}
+                        {entity === 'users' && (<>
+                          <option value="ACTIVE">ACTIVE</option>
+                          <option value="INACTIVE">INACTIVE</option>
+                        </>)}
+                      </select>
+                    </div>
+                  )}
+                </div>
+                <div style={{ flex: 1 }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {selectedIds.length > 0 && (
+                    <>
+                      <button className="btn" onClick={() => { addToast(`Deleted ${selectedIds.length} rows`, 'success'); setSelectedIds([]) }}>Delete({selectedIds.length})</button>
+                      <button className="btn" onClick={() => addToast(`Exported ${selectedIds.length} rows`, 'success')}>Export({selectedIds.length})</button>
+                    </>
+                  )}
+                  <button className="btn" onClick={() => { setEditRow(null); setShowForm(true) }}>Create</button>
+                  <button className="btn" onClick={() => setShowCsv(true)}>Import CSV</button>
+                  <button className="btn" onClick={() => addToast('Exported CSV', 'success')}>Export CSV</button>
+                </div>
+              </>
+            }
+            search={search}
+            onSearchChange={setSearch}
+            statusFilter={statusFilter}
+          />
+        </section>
+      </main>
+      <UnifiedForm
+        open={showForm}
+        title={editRow ? `Edit ${entity}` : `Create ${entity}`}
+        fields={fields}
+        initial={editRow ?? {}}
+        onClose={() => setShowForm(false)}
+        onSubmit={() => { setShowForm(false); addToast('Saved', 'success') }}
+      />
+      <CsvImportModal
+        open={showCsv}
+        entity={entity}
+        onClose={() => setShowCsv(false)}
+        onImport={(data) => { setShowCsv(false); addToast(`Imported ${data.rows.length} rows`, 'success') }}
+      />
+      <Toast toasts={toasts} onDismiss={(id) => setToasts(ts => ts.filter(t => t.id !== id))} />
+      <ConfirmDialog
+        open={confirm.open}
+        title={confirm.action === 'borrow' ? 'Confirm Borrow' : 'Confirm Return'}
+        message={confirm.action === 'borrow' ? 'Proceed with borrowing this item?' : 'Mark this borrowing as returned?'}
+        confirmText={confirm.action === 'borrow' ? 'Borrow' : 'Return'}
+        onCancel={() => setConfirm({ open: false, action: null })}
+        onConfirm={() => { setConfirm({ open: false, action: null }); addToast('Updated', 'success') }}
+      />
+    </div>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <TenantProvider>
+      <ConfigProvider>
+        <AppShell />
+      </ConfigProvider>
+    </TenantProvider>
+  )
+}
+
+// ConsoleTable now lives in components/table/ConsoleTable.tsx

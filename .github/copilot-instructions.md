@@ -8,7 +8,7 @@ PRESERVATION
 Preserve all formatting and original names. Retain comments, annotations and documentation verbatim unless explicitly requested otherwise.
 
 ERROR HANDLING
-After making modifications, run bun run check-errors to check for TypeScript errors and fix any issues before finalizing the code output. Additional error‑checking steps are not required.
+After making modifications, errors and fix any issues before finalizing the code output. Additional error‑checking steps are not required.
 
 OUTPUT FORMAT
 If modifications are applied, output the complete code so it can be easily copied and pasted.
