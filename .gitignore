@@ -1,2 +1,5 @@
-node_modules
+node_modules/
 !settings.local.json
+.env
+*.log
+bun.lockb

@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  # Override frontend for development with hot reload
+  frontend:
+    build:
+      context: ../services/frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../services/frontend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+    ports:
+      - "5173:5173"
