@@ -22,7 +22,7 @@ function AppShell() {
   const [selectedIds, setSelectedIds] = useState<Array<string | number>>([])
   const [confirm, setConfirm] = useState<{ open: boolean; action: 'borrow'|'return'|null; row?: any }>({ open: false, action: null })
   const [search, setSearch] = useState('')
-  const [statusFilter] = useState('')
+
   const addToast = useCallback((text: string, type: 'info'|'success'|'warning'|'error' = 'info') => {
     if (type === 'success') toast.success(text)
     else if (type === 'error') toast.error(text)
@@ -34,9 +34,6 @@ function AppShell() {
     if (entity === 'users') return [
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'contact', label: 'Contact', type: 'text' },
-      { name: 'status', label: 'Status', type: 'select', options: [
-        { label: 'ACTIVE', value: 'ACTIVE' }, { label: 'INACTIVE', value: 'INACTIVE' },
-      ] },
       { name: 'blacklistUntil', label: 'Blacklist Until', type: 'date' },
     ]
     if (entity === 'borrowings') return [
@@ -47,11 +44,9 @@ function AppShell() {
     ]
     return [
       { name: 'name', label: 'Name', type: 'text', required: true },
-      { name: 'totalCount', label: 'Total', type: 'number', required: true },
-      { name: 'availableCount', label: 'Available', type: 'number', required: true },
-      { name: 'status', label: 'Status', type: 'select', polished: true, options: [
-        { label: 'AVAILABLE', value: 'AVAILABLE' }, { label: 'LOW', value: 'LOW' }, { label: 'OUT', value: 'OUT' },
-      ] },
+      { name: 'category', label: 'Category', type: 'text' },
+      { name: 'totalCount', label: 'Total Count', type: 'number', required: true },
+      { name: 'availableCount', label: 'Available Now', type: 'number', required: true },
     ]
   }, [entity])
 
@@ -98,7 +93,7 @@ function AppShell() {
             }
             search={search}
             onSearchChange={setSearch}
-            statusFilter={statusFilter}
+
           />
         </section>
       </main>

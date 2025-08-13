@@ -14,18 +14,17 @@ interface Props {
   headerContent: React.ReactNode
   search: string
   onSearchChange: (v: string) => void
-  statusFilter: string
 }
 
-export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onReturn, selectedIds, onSelectionChange, headerContent, search, onSearchChange, statusFilter }: Props) {
+export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onReturn, selectedIds, onSelectionChange, headerContent, search, onSearchChange }: Props) {
   const [items] = useState(() => ([
-    { id: 'i1', name: 'HDMI Cable', totalCount: 10, availableCount: 8, status: 'AVAILABLE' },
-    { id: 'i2', name: 'Projector', totalCount: 3, availableCount: 1, status: 'LOW' },
+    { id: 'i1', name: 'HDMI Cable', category: 'Cables', totalCount: 10, availableCount: 8 },
+    { id: 'i2', name: 'Projector', category: 'AV Equipment', totalCount: 3, availableCount: 1 },
   ]))
 
   const [users] = useState(() => ([
-    { id: 'u1', name: 'Alice', contact: 'alice@example.com', status: 'ACTIVE' },
-    { id: 'u2', name: 'Bob', contact: 'bob@example.com', status: 'ACTIVE' },
+    { id: 'u1', name: 'Alice', contact: 'alice@example.com' },
+    { id: 'u2', name: 'Bob', contact: 'bob@example.com' },
   ]))
 
   const [borrowings] = useState(() => ([
@@ -44,13 +43,12 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
   }
 
   if (entity === 'users') {
-    const filtered = statusFilter ? users.filter(u => u.status === statusFilter) : users
+    const filtered = users
     return (
       <DataTable
         columns={[
           { key: 'name', header: 'Name', sortable: true },
           { key: 'contact', header: 'Contact' },
-          { key: 'status', header: 'Status' },
         ]}
         rows={filtered}
         rowKey={(r) => r.id}
@@ -73,7 +71,6 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
           { key: 'userId', header: 'User' },
           { key: 'startDate', header: 'Start', sortable: true },
           { key: 'dueDate', header: 'Due', sortable: true },
-          { key: 'returnedAt', header: 'Returned' },
         ]}
         rows={borrowings}
         rowKey={(r) => r.id}
@@ -89,14 +86,13 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
     )
   }
 
-  const filtered = statusFilter ? items.filter(i => i.status === statusFilter) : items
+  const filtered = items
   return (
     <DataTable
       columns={[
         { key: 'name', header: 'Name', sortable: true },
-        { key: 'totalCount', header: 'Total', sortable: true },
-        { key: 'availableCount', header: 'Available', sortable: true },
-        { key: 'status', header: 'Status' },
+        { key: 'category', header: 'Category' },
+        { key: 'stock', header: 'Available / Total', render: (r: any) => `${r.availableCount}/${r.totalCount}` },
       ]}
       rows={filtered}
       rowKey={(r) => r.id}
