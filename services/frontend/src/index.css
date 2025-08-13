@@ -194,6 +194,7 @@ body {
 }
 .btn:hover { filter: brightness(1.05); }
 .btn:focus-visible { outline: 2px solid rgba(var(--glow-strong), .65); outline-offset: 2px; }
+.input:focus-visible, .select:focus-visible { outline: 2px solid rgba(var(--glow-strong), .65); outline-offset: 2px; }
 
 /* Themed checkbox */
 .checkbox {

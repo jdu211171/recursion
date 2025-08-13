@@ -10,10 +10,11 @@ type OptionDef = {
 
 function getOptions(children: ReactNode): OptionDef[] {
   const opts: OptionDef[] = []
-  Children.forEach(children, (child: ReactNode) => {
+  Children.forEach(children, (child: unknown) => {
     if (isValidElement(child) && (child.type as any) === 'option') {
-      const { value, disabled } = child.props
-      const label = child.props.children
+      const el = child as React.ReactElement<any>
+      const { value, disabled } = (el.props as any)
+      const label = (el.props as any).children as ReactNode
       opts.push({ value: value != null ? String(value) : '', label, disabled })
     }
   })
@@ -37,6 +38,7 @@ export default function Select(props: Props) {
 
   const [open, setOpen] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const hiddenRef = useRef<HTMLSelectElement>(null)
 
   const currentValue = value != null ? String(value) : internalValue
@@ -48,7 +50,7 @@ export default function Select(props: Props) {
   // Close when clicking outside
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
-      if (!wrapperRef.current?.contains(e.target as Node)) setOpen(false)
+      if (!containerRef.current?.contains(e.target as Node)) setOpen(false)
     }
     if (open) document.addEventListener('mousedown', onDoc)
     return () => document.removeEventListener('mousedown', onDoc)
@@ -73,7 +75,7 @@ export default function Select(props: Props) {
   const listId = `${id || name || 'select'}-listbox`
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block', minWidth: 'min(160px, 100%)', width: style?.width }}>
+    <div ref={containerRef} style={{ position: 'relative', display: 'inline-block', minWidth: 'min(160px, 100%)', width: style?.width }}>
 
       {/* Visible custom control */}
       <div
@@ -183,4 +185,3 @@ export default function Select(props: Props) {
     </div>
   )
 }
-

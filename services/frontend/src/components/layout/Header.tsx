@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react'
+import { useState, type ChangeEvent } from 'react'
 import Select from '../primitives/Select'
 import ThemeSwitcher from '../primitives/ThemeSwitcher'
 import { useTenant } from '../../contexts/TenantContext'
@@ -6,10 +6,16 @@ import { useTenant } from '../../contexts/TenantContext'
 export default function Header() {
   const { organizations, instances, currentOrg, currentInstance, setCurrentOrg, setCurrentInstance } = useTenant()
 
+  const [showCreateOrg, setShowCreateOrg] = useState(false)
+  const [showCreateInst, setShowCreateInst] = useState(false)
+  const [newOrgName, setNewOrgName] = useState('')
+  const [newInstName, setNewInstName] = useState('')
+
+
   const onOrg = (e: ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value
     if (val === '__create_org__') {
-      // TODO: open create organization modal
+      setShowCreateOrg(true)
       return
     }
     const org = organizations.find(o => String(o.id) === val) || null
@@ -19,7 +25,7 @@ export default function Header() {
   const onInst = (e: ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value
     if (val === '__create_inst__') {
-      // TODO: open create instance modal
+      setShowCreateInst(true)
       return
     }
     const inst = instances.find(i => String(i.id) === val) || null
@@ -48,7 +54,66 @@ export default function Header() {
           </Select>
         </div>
         <ThemeSwitcher />
+        <button 
+          className="btn" 
+          onClick={() => {
+            // TODO: Implement logout logic
+            console.log('Logout clicked')
+          }}
+          aria-label="Logout"
+          title="Logout"
+          style={{ 
+            padding: '6px 10px', 
+            marginLeft: 8,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            strokeWidth={1.5} 
+            stroke="currentColor" 
+            style={{ width: 18, height: 18, display: 'block' }}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+          </svg>
+        </button>
       </div>
+
+      {showCreateOrg && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" onClick={() => setShowCreateOrg(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ marginTop: 0 }}>Create organization</h3>
+            <div className="field">
+              <label className="muted" htmlFor="new-org">Name</label>
+              <input id="new-org" className="input" placeholder="Organization name" value={newOrgName} onChange={(e) => setNewOrgName(e.target.value)} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
+              <button className="btn" onClick={() => { setShowCreateOrg(false); setNewOrgName('') }}>Cancel</button>
+              <button className="btn" onClick={() => { setShowCreateOrg(false); setNewOrgName('') }}>Create</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCreateInst && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" onClick={() => setShowCreateInst(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ marginTop: 0 }}>Create instance</h3>
+            <div className="field">
+              <label className="muted" htmlFor="new-inst">Name</label>
+              <input id="new-inst" className="input" placeholder="Instance name" value={newInstName} onChange={(e) => setNewInstName(e.target.value)} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
+              <button className="btn" onClick={() => { setShowCreateInst(false); setNewInstName('') }}>Cancel</button>
+              <button className="btn" onClick={() => { setShowCreateInst(false); setNewInstName('') }}>Create</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

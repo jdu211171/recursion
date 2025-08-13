@@ -79,6 +79,7 @@
 ✓ Task Completion Reports
 - Extracted ConsoleTable into own component at `src/components/table/ConsoleTable.tsx` and updated `App.tsx` to use it.
 - Fixed DataTable controlled search to apply pre-pagination via `useTableState` externalSearch option; result count now reflects total filtered rows.
+- Migrated toast system to Sonner: added `<Toaster />`, replaced local toast state with `toast.*` calls, imported `sonner/dist/styles.css`, and removed old `src/components/primitives/Toast.tsx`.
 - Implemented new in-page SPA shell without router in `src/App.tsx`.
 - Added global theme and responsive styles in `src/index.css` based on root `index.html`.
 - Updated `services/frontend/index.html` to load Inter font and set metadata/title.

@@ -6,7 +6,7 @@ import Overview from './pages/Overview'
 import UnifiedForm, { type FieldMeta } from './components/forms/UnifiedForm'
 import CsvImportModal from './components/forms/CsvImportModal'
 import ConfirmDialog from './components/forms/ConfirmDialog'
-import Toast, { type ToastMessage } from './components/primitives/Toast'
+import { Toaster, toast } from 'sonner'
 import { TenantProvider } from './contexts/TenantContext'
 import { ConfigProvider } from './contexts/ConfigContext'
 // Note: Context providers will be reintroduced after MUI removal
@@ -17,13 +17,16 @@ function AppShell() {
   const [showForm, setShowForm] = useState(false)
   const [editRow, setEditRow] = useState<any | null>(null)
   const [showCsv, setShowCsv] = useState(false)
-  const [toasts, setToasts] = useState<ToastMessage[]>([])
+  // Sonner handles toast state internally via <Toaster />
   const [selectedIds, setSelectedIds] = useState<Array<string | number>>([])
   const [confirm, setConfirm] = useState<{ open: boolean; action: 'borrow'|'return'|null; row?: any }>({ open: false, action: null })
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
-  const addToast = useCallback((text: string, type: ToastMessage['type'] = 'info') => {
-    setToasts(ts => [...ts, { id: Math.random().toString(36).slice(2), text, type }])
+  const addToast = useCallback((text: string, type: 'info'|'success'|'warning'|'error' = 'info') => {
+    if (type === 'success') toast.success(text)
+    else if (type === 'error') toast.error(text)
+    else if (type === 'warning') toast.warning(text)
+    else toast.info(text)
   }, [])
 
   const fields: FieldMeta[] = useMemo(() => {
@@ -129,7 +132,7 @@ function AppShell() {
         onClose={() => setShowCsv(false)}
         onImport={(data) => { setShowCsv(false); addToast(`Imported ${data.rows.length} rows`, 'success') }}
       />
-      <Toast toasts={toasts} onDismiss={(id) => setToasts(ts => ts.filter(t => t.id !== id))} />
+      <Toaster richColors position="bottom-right" />
       <ConfirmDialog
         open={confirm.open}
         title={confirm.action === 'borrow' ? 'Confirm Borrow' : 'Confirm Return'}
