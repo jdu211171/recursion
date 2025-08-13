@@ -89,6 +89,7 @@
 - Added UI primitives (Button, Input, Modal), new Feedback modal, and integrated into Overview.
 - Implemented non-MUI table console (Header, Toolbar, DataTable, Overview) and lite contexts.
 - Added CSV utilities and CsvImportModal; wired toolbar actions for create/import/export with UnifiedForm schemas (Items/Users/Borrowings) and toasts.
+- Flattened DataTable surface styling: removed elevation, applied flat translucent glass panel consistent with theme switcher; added clearer row hover and selection states.
 
 ✅ Completed Tasks
 - Repository status reviewed; initial plan drafted.

@@ -81,23 +81,6 @@ function AppShell() {
                       <option value="borrowings">Borrowings</option>
                     </Select>
                   </div>
-                  {(entity === 'items' || entity === 'users') && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <label className="muted" htmlFor="status">Status</label>
-                      <Select id="status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                        <option value="">All</option>
-                        {entity === 'items' && (<>
-                          <option value="AVAILABLE">AVAILABLE</option>
-                          <option value="LOW">LOW</option>
-                          <option value="OUT">OUT</option>
-                        </>)}
-                        {entity === 'users' && (<>
-                          <option value="ACTIVE">ACTIVE</option>
-                          <option value="INACTIVE">INACTIVE</option>
-                        </>)}
-                      </Select>
-                    </div>
-                  )}
                 </div>
                 <div style={{ flex: 1 }} />
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

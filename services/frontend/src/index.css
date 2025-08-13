@@ -259,3 +259,52 @@ input[type="number"] {
 @keyframes sk { 0%{ transform: translateX(-4%);} 50%{ transform: translateX(4%);} 100%{ transform: translateX(-4%);} }
 
 /* Live region for toasts (handled inside component) */
+
+/* Flat DataTable surface overrides */
+.card[role="region"][aria-label="Data table"] {
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  box-shadow: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0; /* inner sections manage their own padding */
+}
+
+/* Header and footer retain separators via inline styles, ensure radius continuity */
+.card[role="region"][aria-label="Data table"] > div:first-child {
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
+}
+
+.card[role="region"][aria-label="Data table"] > div:last-child {
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+}
+
+/* Body row hover + selection states (no elevation) */
+.card[role="region"][aria-label="Data table"] table tbody tr {
+  transition: background 160ms var(--easing);
+}
+
+.card[role="region"][aria-label="Data table"] table tbody tr:hover {
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+}
+
+/* Highlight rows with a checked selection box */
+.card[role="region"][aria-label="Data table"] table tbody tr:has(input[type="checkbox"]:checked) {
+  background: linear-gradient(180deg, rgba(255, 235, 160, 0.20), rgba(255, 235, 160, 0.10));
+  box-shadow: 0 0 0 1px rgba(255, 220, 130, 0.40) inset, 0 0 0 3px rgba(var(--glow-strong), 0.12) inset;
+}
+
+/* Pagination/footer bar subtle surface */
+.card[role="region"][aria-label="Data table"] > div[style*="border-top"] {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+}
+
+/* Denser action buttons inside table */
+.card[role="region"][aria-label="Data table"] .btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 8px;
+}
