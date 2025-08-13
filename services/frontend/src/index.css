@@ -250,6 +250,48 @@ input[type="number"] {
   box-shadow: 0 0 8px rgba(var(--glow-strong), 0.65);
 }
 
+/* Themed radio (mirrors checkbox styling, circular) */
+.radio {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  transition: box-shadow var(--speed) var(--easing), border-color var(--speed) var(--easing), background var(--speed) var(--easing), transform 80ms ease;
+}
+.radio:hover {
+  box-shadow: 0 0 0 3px rgba(var(--glow-strong), 0.12);
+}
+.radio:active {
+  transform: translateY(1px);
+}
+.radio:focus-visible {
+  outline: 2px solid rgba(var(--glow-strong), .65);
+  outline-offset: 2px;
+}
+.radio::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  transform: scale(0);
+  transition: transform var(--speed) var(--easing), background var(--speed) var(--easing), box-shadow var(--speed) var(--easing);
+}
+.radio:checked {
+  border-color: rgba(255, 220, 130, 0.70);
+  background: linear-gradient(180deg, rgba(255, 235, 160, 0.38), rgba(255, 235, 160, 0.18));
+  box-shadow: 0 0 0 4px rgba(var(--glow-strong), 0.18), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+.radio:checked::before {
+  transform: scale(1);
+  background: #ffe27d;
+  box-shadow: 0 0 8px rgba(var(--glow-strong), 0.65);
+}
+
 /* Modal */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: grid; place-items: center; padding: 16px; z-index: 50; }
 .modal { width: min(560px, 92vw); border-radius: var(--radius-lg); padding: 16px; background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06)); border: 1px solid var(--border); box-shadow: var(--shadow); backdrop-filter: blur(14px) saturate(120%); }

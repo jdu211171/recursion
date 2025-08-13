@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import Modal from '../primitives/Modal'
 import Button from '../primitives/Button'
+import Radio from '../primitives/Radio'
 import { parseCsvFile, type ParsedCsv } from '../../utils/csv'
 
 interface Props {
@@ -14,6 +15,7 @@ export default function CsvImportModal({ open, entity, onClose, onImport }: Prop
   const [csv, setCsv] = useState<ParsedCsv | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [mapping, setMapping] = useState<Record<string, string>>({})
+  const [importMode, setImportMode] = useState<'create' | 'update'>('create')
 
   const columnsHint = useMemo(() => {
     if (entity === 'users') return 'Expected columns: id,name,contact,status'
@@ -88,11 +90,44 @@ export default function CsvImportModal({ open, entity, onClose, onImport }: Prop
               </table>
             </div>
           </div>
+        <div className="field" style={{ marginTop: 16 }}>
+          <label className="muted">Import Mode</label>
+          <div style={{ display: 'flex', gap: 20, marginTop: 6 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Radio
+                name="importMode"
+                value="create"
+                checked={importMode === 'create'}
+                onChange={() => setImportMode('create')}
+              />
+              <span>Create (insert new records)</span>
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Radio
+                name="importMode"
+                value="update"
+                checked={importMode === 'update'}
+                onChange={() => setImportMode('update')}
+              />
+              <span>Update (match existing by id)</span>
+            </label>
+          </div>
         </div>
+      </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
         <Button variant="ghost" onClick={onClose}>Cancel</Button>
-        <Button onClick={() => { if (csv) onImport(csv) }} disabled={!csv}>Commit</Button>
+        <Button
+          onClick={() => {
+            if (csv) {
+              const payload = Object.assign({}, csv, { importMode } as any)
+              onImport(payload as any)
+            }
+          }}
+          disabled={!csv}
+        >
+          Commit
+        </Button>
       </div>
     </Modal>
   )
