@@ -22,7 +22,7 @@ function AppShell() {
   const [selectedIds, setSelectedIds] = useState<Array<string | number>>([])
   const [confirm, setConfirm] = useState<{ open: boolean; action: 'borrow'|'return'|null; row?: any }>({ open: false, action: null })
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
+  const [statusFilter] = useState('')
   const addToast = useCallback((text: string, type: 'info'|'success'|'warning'|'error' = 'info') => {
     if (type === 'success') toast.success(text)
     else if (type === 'error') toast.error(text)
@@ -49,7 +49,7 @@ function AppShell() {
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'totalCount', label: 'Total', type: 'number', required: true },
       { name: 'availableCount', label: 'Available', type: 'number', required: true },
-      { name: 'status', label: 'Status', type: 'select', options: [
+      { name: 'status', label: 'Status', type: 'select', polished: true, options: [
         { label: 'AVAILABLE', value: 'AVAILABLE' }, { label: 'LOW', value: 'LOW' }, { label: 'OUT', value: 'OUT' },
       ] },
     ]
@@ -82,7 +82,7 @@ function AppShell() {
                     </Select>
                   </div>
                 </div>
-                <div style={{ flex: 1 }} />
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {selectedIds.length > 0 && (
                     <>

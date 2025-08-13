@@ -14,11 +14,12 @@ interface Props<T> {
   rowActions?: (row: T) => { id: string; label: string }[]
   loading?: boolean
   headerContent?: ReactNode
+  headerActions?: ReactNode
   search?: string
   onSearchChange?: (v: string) => void
 }
 
-export default function DataTable<T>({ columns, rows, rowKey, onRowAction, selectedIds, onSelectionChange, rowActions, loading, headerContent, search, onSearchChange }: Props<T>) {
+export default function DataTable<T>({ columns, rows, rowKey, onRowAction, selectedIds, onSelectionChange, rowActions, loading, headerContent, headerActions, search, onSearchChange }: Props<T>) {
   const state = useTableState(rows, { externalSearch: typeof search === 'string' ? search : undefined })
   const selectedSet = new Set(selectedIds ?? Array.from(state.selected))
   const allSelected = state.pageRows.every(r => selectedSet.has(rowKey(r))) && state.pageRows.length > 0
@@ -62,7 +63,7 @@ export default function DataTable<T>({ columns, rows, rowKey, onRowAction, selec
         </div>
       )}
       <div className="card" role="region" aria-label="Data table" style={{ boxShadow: 'none', background: 'linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04))', backdropFilter: 'blur(10px) saturate(120%)', WebkitBackdropFilter: 'blur(10px) saturate(120%)', padding: 0 }}>
-        {/* Table header bar (search only now) */}
+        {/* Table header bar (search + actions) */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -100,6 +101,12 @@ export default function DataTable<T>({ columns, rows, rowKey, onRowAction, selec
               }}
             />
           </div>
+          <div style={{ flex: 1 }} />
+          {headerActions && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {headerActions}
+            </div>
+          )}
         </div>
 
         {/* Data table */}

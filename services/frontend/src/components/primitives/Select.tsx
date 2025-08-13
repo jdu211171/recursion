@@ -1,4 +1,5 @@
 import { Children, isValidElement, useEffect, useMemo, useRef, useState, type ReactNode, type SelectHTMLAttributes } from 'react'
+import { createPortal } from 'react-dom'
 
 type Props = SelectHTMLAttributes<HTMLSelectElement>
 
@@ -39,6 +40,7 @@ export default function Select(props: Props) {
   const [open, setOpen] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const hiddenRef = useRef<HTMLSelectElement>(null)
 
   const currentValue = value != null ? String(value) : internalValue
@@ -50,10 +52,40 @@ export default function Select(props: Props) {
   // Close when clicking outside
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
-      if (!containerRef.current?.contains(e.target as Node)) setOpen(false)
+      const target = e.target as Node
+      if (!containerRef.current?.contains(target) && !panelRef.current?.contains(target)) {
+        setOpen(false)
+      }
     }
     if (open) document.addEventListener('mousedown', onDoc)
     return () => document.removeEventListener('mousedown', onDoc)
+  }, [open])
+
+  // Compute panel position relative to viewport when open
+  const [panelPos, setPanelPos] = useState<{ top: number; left: number; width: number; placeAbove: boolean } | null>(null)
+  useEffect(() => {
+    if (!open) { setPanelPos(null); return }
+    const compute = () => {
+      const el = wrapperRef.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      const margin = 6
+      const estimatedHeight = Math.min(280, 240) // rough; corrected after mount
+      const spaceBelow = window.innerHeight - rect.bottom - margin
+      const placeAbove = spaceBelow < 160 // prefer above if tight below
+      const top = placeAbove ? Math.max(8, rect.top - margin - estimatedHeight) : Math.min(window.innerHeight - 8, rect.bottom + margin)
+      const left = Math.max(8, Math.min(rect.left, window.innerWidth - rect.width - 8))
+      setPanelPos({ top, left, width: rect.width, placeAbove })
+    }
+    compute()
+    const onScroll = () => compute()
+    const onResize = () => compute()
+    window.addEventListener('scroll', onScroll, true)
+    window.addEventListener('resize', onResize)
+    return () => {
+      window.removeEventListener('scroll', onScroll, true)
+      window.removeEventListener('resize', onResize)
+    }
   }, [open])
 
   const commitChange = (next: string) => {
@@ -109,24 +141,27 @@ export default function Select(props: Props) {
         </span>
       </div>
 
-      {/* Dropdown menu */}
-      {open && !disabled && (
+      {/* Dropdown menu (portal to body to avoid clipping) */}
+      {open && !disabled && panelPos && createPortal(
         <div
+          ref={panelRef}
           role="listbox"
           id={listId}
           aria-activedescendant={undefined}
+          onMouseDown={(e) => e.stopPropagation()}
           style={{
-            position: 'absolute',
-            zIndex: 1000,
-            left: 0,
-            right: 0,
-            marginTop: 6,
+            position: 'fixed',
+            zIndex: 10000,
+            top: panelPos.top,
+            left: panelPos.left,
+            width: panelPos.width,
             padding: 6,
             borderRadius: 12,
             background: 'linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06))',
             border: '1px solid var(--border)',
             boxShadow: 'var(--shadow)',
             backdropFilter: 'blur(14px) saturate(120%)',
+            WebkitBackdropFilter: 'blur(14px) saturate(120%)',
             maxHeight: 280,
             overflowY: 'auto'
           }}
@@ -139,7 +174,7 @@ export default function Select(props: Props) {
                 role="option"
                 aria-selected={selected}
                 onClick={() => !o.disabled && commitChange(String(o.value))}
-                onMouseDown={(e) => e.preventDefault()} // prevent focus loss flicker
+                onMouseDown={(e) => { e.preventDefault(); e.stopPropagation() }}
                 style={{
                   padding: '10px 12px',
                   borderRadius: 10,
@@ -161,7 +196,8 @@ export default function Select(props: Props) {
               </div>
             )
           })}
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Hidden native select for forms and accessibility; keep original id/name */}

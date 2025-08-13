@@ -3,6 +3,7 @@ import Modal from '../primitives/Modal'
 import Input from '../primitives/Input'
 import Button from '../primitives/Button'
 import { validate } from '../../utils/validators'
+import Select from '../primitives/Select'
 
 export type FieldType = 'text' | 'number' | 'date' | 'select'
 
@@ -12,6 +13,7 @@ export interface FieldMeta {
   type: FieldType
   required?: boolean
   options?: { label: string; value: string }[]
+  polished?: boolean
 }
 
 interface Props<T> {
@@ -57,11 +59,18 @@ export default function UnifiedForm<T>({ open, title, fields, initial = {}, onCl
             <div key={f.name} className="col-6 field">
               <label htmlFor={`f_${f.name}`} className="muted">{f.label}{f.required && ' *'}</label>
               {f.type === 'select' ? (
-                <select id={`f_${f.name}`} className="select" value={values[f.name] ?? ''}
-                        onChange={(e) => setValues(v => ({ ...v, [f.name]: e.target.value }))} required={f.required}>
-                  <option value="">Select...</option>
-                  {(f.options || []).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
+                f.polished ? (
+                  <Select id={`f_${f.name}`} value={values[f.name] ?? ''} onChange={(e) => setValues(v => ({ ...v, [f.name]: e.target.value }))} required={f.required}>
+                    <option value="">Select...</option>
+                    {(f.options || []).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </Select>
+                ) : (
+                  <select id={`f_${f.name}`} className="select" value={values[f.name] ?? ''}
+                          onChange={(e) => setValues(v => ({ ...v, [f.name]: e.target.value }))} required={f.required}>
+                    <option value="">Select...</option>
+                    {(f.options || []).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                )
               ) : (
                 <Input id={`f_${f.name}`} required={f.required} type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
                        value={values[f.name] ?? ''}

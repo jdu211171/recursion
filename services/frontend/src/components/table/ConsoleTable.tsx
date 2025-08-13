@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import DataTable from './DataTable'
 import type { EntityKey } from '../layout/Toolbar'
 
@@ -31,6 +32,17 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
     { id: 'b1', itemId: 'i2', userId: 'u1', startDate: '2025-08-01', dueDate: '2025-08-10', returnedAt: null as string | null },
   ]))
 
+  // Derive header actions (Create / Import CSV / Export CSV) from the last child of headerContent
+  let headerContentMain = headerContent
+  let headerActions: ReactNode | undefined
+  const hcChildren = (headerContent as any)?.props?.children
+  if (Array.isArray(hcChildren) && hcChildren.length >= 2) {
+    headerActions = hcChildren[hcChildren.length - 1]
+    headerContentMain = <>
+      {hcChildren.slice(0, hcChildren.length - 1)}
+    </>
+  }
+
   if (entity === 'users') {
     const filtered = statusFilter ? users.filter(u => u.status === statusFilter) : users
     return (
@@ -45,7 +57,8 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
         onRowAction={(a, r) => { if (a === 'edit') onEdit(r); else onDelete(r) }}
         selectedIds={selectedIds}
         onSelectionChange={onSelectionChange}
-        headerContent={headerContent}
+        headerContent={headerContentMain}
+        headerActions={headerActions}
         search={search}
         onSearchChange={onSearchChange}
       />
@@ -68,7 +81,8 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
         rowActions={(r) => (r.returnedAt ? [{ id: 'edit', label: 'Edit' }, { id: 'delete', label: 'Delete' }] : [{ id: 'return', label: 'Return' }, { id: 'edit', label: 'Edit' }, { id: 'delete', label: 'Delete' }])}
         selectedIds={selectedIds}
         onSelectionChange={onSelectionChange}
-        headerContent={headerContent}
+        headerContent={headerContentMain}
+        headerActions={headerActions}
         search={search}
         onSearchChange={onSearchChange}
       />
@@ -90,7 +104,8 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
       rowActions={(r) => (r.availableCount > 0 ? [{ id: 'borrow', label: 'Borrow' }, { id: 'edit', label: 'Edit' }, { id: 'delete', label: 'Delete' }] : [{ id: 'edit', label: 'Edit' }, { id: 'delete', label: 'Delete' }])}
       selectedIds={selectedIds}
       onSelectionChange={onSelectionChange}
-      headerContent={headerContent}
+      headerContent={headerContentMain}
+      headerActions={headerActions}
       search={search}
       onSearchChange={onSearchChange}
     />
