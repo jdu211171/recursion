@@ -1,5 +1,6 @@
 import type { Column } from './Column'
 import Checkbox from '../primitives/Checkbox'
+import Select from '../primitives/Select'
 import useTableState from './useTableState'
 import type { ReactNode } from 'react'
 
@@ -158,14 +159,15 @@ export default function DataTable<T>({ columns, rows, rowKey, onRowAction, selec
           alignItems: 'center',
           padding: '12px 16px',
           borderTop: '1px solid var(--border)',
-
+          flexWrap: 'wrap',
+          gap: 10
         }}>
           <div className="muted">{state.total} results</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 auto', justifyContent: 'flex-end', flexWrap: 'wrap', minWidth: 0 }}>
             <label className="muted" htmlFor="page-size">Rows</label>
-            <select id="page-size" className="select" value={state.pagination.pageSize} onChange={(e) => state.setPagination(p => ({ ...p, pageSize: Number(e.target.value), page: 1 }))}>
+            <Select id="page-size" value={state.pagination.pageSize} onChange={(e) => state.setPagination(p => ({ ...p, pageSize: Number(e.target.value), page: 1 }))}>
               {[10, 20, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
+            </Select>
             <button className="btn" onClick={() => goToPage(state.pagination.page - 1)} aria-label="Previous page" disabled={state.pagination.page <= 1}>Prev</button>
             <div className="muted" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 6px' }}>
               <span>Page</span>

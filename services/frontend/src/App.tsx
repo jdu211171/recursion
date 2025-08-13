@@ -6,6 +6,7 @@ import Overview from './pages/Overview'
 import UnifiedForm, { type FieldMeta } from './components/forms/UnifiedForm'
 import CsvImportModal from './components/forms/CsvImportModal'
 import ConfirmDialog from './components/forms/ConfirmDialog'
+import Select from './components/primitives/Select'
 import { Toaster, toast } from 'sonner'
 import { TenantProvider } from './contexts/TenantContext'
 import { ConfigProvider } from './contexts/ConfigContext'
@@ -71,19 +72,19 @@ function AppShell() {
             onReturn={(row) => setConfirm({ open: true, action: 'return', row })}
             headerContent={
               <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <label className="muted" htmlFor="entity">Entity</label>
-                    <select id="entity" className="select" value={entity} onChange={(e) => setEntity(e.target.value as EntityKey)}>
+                    <Select id="entity" value={entity} onChange={(e) => setEntity(e.target.value as EntityKey)}>
                       <option value="items">Items</option>
                       <option value="users">Users</option>
                       <option value="borrowings">Borrowings</option>
-                    </select>
+                    </Select>
                   </div>
                   {(entity === 'items' || entity === 'users') && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <label className="muted" htmlFor="status">Status</label>
-                      <select id="status" className="select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                      <Select id="status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                         <option value="">All</option>
                         {entity === 'items' && (<>
                           <option value="AVAILABLE">AVAILABLE</option>
@@ -94,7 +95,7 @@ function AppShell() {
                           <option value="ACTIVE">ACTIVE</option>
                           <option value="INACTIVE">INACTIVE</option>
                         </>)}
-                      </select>
+                      </Select>
                     </div>
                   )}
                 </div>

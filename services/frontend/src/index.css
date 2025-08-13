@@ -196,6 +196,18 @@ body {
 .btn:focus-visible { outline: 2px solid rgba(var(--glow-strong), .65); outline-offset: 2px; }
 .input:focus-visible, .select:focus-visible { outline: 2px solid rgba(var(--glow-strong), .65); outline-offset: 2px; }
 
+/* Hide number input spinners - WebKit */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide number input spinners - Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 /* Themed checkbox */
 .checkbox {
   appearance: none;
