@@ -145,6 +145,26 @@ body {
   border: 1px solid var(--border);
   border-radius: 10px;
 }
+
+.input::placeholder {
+  color: rgba(255,255,255,0.9);
+  opacity: 1;
+}
+
+.select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: 36px; /* extra space for chevron */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' stroke-opacity='0.9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center; /* move chevron away from edge */
+  background-size: 14px 14px;
+}
+
+.select::-ms-expand {
+  display: none;
+}
 .btn {
   appearance: none;
   border: 1px solid var(--border);
@@ -158,6 +178,48 @@ body {
 }
 .btn:hover { filter: brightness(1.05); }
 .btn:focus-visible { outline: 2px solid rgba(var(--glow-strong), .65); outline-offset: 2px; }
+
+/* Themed checkbox */
+.checkbox {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  transition: box-shadow var(--speed) var(--easing), border-color var(--speed) var(--easing), background var(--speed) var(--easing), transform 80ms ease;
+}
+.checkbox:hover {
+  box-shadow: 0 0 0 3px rgba(var(--glow-strong), 0.12);
+}
+.checkbox:active {
+  transform: translateY(1px);
+}
+.checkbox:focus-visible {
+  outline: 2px solid rgba(var(--glow-strong), .65);
+  outline-offset: 2px;
+}
+.checkbox::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 4px;
+  transform: scale(0);
+  transition: transform var(--speed) var(--easing), background var(--speed) var(--easing), box-shadow var(--speed) var(--easing);
+}
+.checkbox:checked {
+  border-color: rgba(255, 220, 130, 0.70);
+  background: linear-gradient(180deg, rgba(255, 235, 160, 0.38), rgba(255, 235, 160, 0.18));
+  box-shadow: 0 0 0 4px rgba(var(--glow-strong), 0.18), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+.checkbox:checked::before {
+  transform: scale(1);
+  background: #ffe27d;
+  box-shadow: 0 0 8px rgba(var(--glow-strong), 0.65);
+}
 
 /* Modal */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: grid; place-items: center; padding: 16px; z-index: 50; }
