@@ -4,11 +4,10 @@ Context: Extracted from your tabular spec to small, incremental tasks. We will i
 
 General Foundations
  - [x] Limit global search to columns marked `searchable` (no picker UI).
-- [ ] Add lightweight Filters panel component (Status, DateRange, Role) and hook into `DataTable` state.
-- [ ] Ensure hidden-but-present ID/Org/Instance fields flow through export payloads even if not rendered.
+ - [ ] Ensure hidden-but-present ID/Org/Instance fields flow through export payloads even if not rendered.
  - [x] Extend CSV import to support strict update mode (require `id`), and dry-run preview grouping (adds/updates/errors) before commit.
-- [ ] Align CSV export to respect current filters/selection/sort and always include hidden identifiers.
-- [ ] Add Archive pattern (Active/Archived) helpers and UI toggle; prefer archive over delete where specified.
+ - [ ] Align CSV export to respect current selection/sort and always include hidden identifiers.
+ - [ ] Add Archive pattern (Active/Archived) helpers and UI toggle; prefer archive over delete where specified.
 
 1) Organizations (Tenants)
 - [ ] Define `Organization` type with hidden `id`, name, counts, createdAt.
@@ -43,34 +42,34 @@ General Foundations
 - [ ] Default sort modes by view (pending segregation of views).
 
 6) Reservations
-- [ ] Define `Reservation` type with item, user, date range, status, createdAt.
-- [ ] Table columns: Reservation ID (hidden), Item, User, Reserved From, Reserved To, Status, Created At.
-- [ ] Row actions: Fulfill (convert to borrowing, adjust availability), Cancel, Extend Hold (policy guard).
-- [ ] Toolbar: Export CSV; Search: User, Item, Status; Default sort Reserved From ↑.
+- [x] Define `Reservation` type with item, user, date range, status, createdAt (demo data).
+- [x] Table columns: Item, User, Reserved From/To, Status, Created At.
+- [x] Row actions: Fulfill, Extend, Cancel (stubs).
+- [ ] Toolbar: Export CSV; Search; Default sort (pending wiring).
 
 7) Blacklist / Penalty Records
-- [ ] Define `PenaltyRecord` type with user, optional item, reason, untilDate, severity, status, notes.
-- [ ] Table columns: Record ID (hidden), User, Item (optional), Reason, Created At, Until Date, Severity, Status, Notes.
-- [ ] Row actions: Edit/Override (admin; capture reason), Remove (admin; leave audit tombstone if possible).
-- [ ] Toolbar: Export CSV; Search: User, Reason, Item; Default sort: Status (Active first), then Until Date ↑.
+- [x] Define `PenaltyRecord` type with user, optional item, reason, untilDate, severity, status, notes (demo data).
+- [x] Table columns: User, Item, Reason, Created At, Until Date, Severity, Status, Notes.
+- [x] Row actions: Edit, Remove (stubs).
+- [ ] Toolbar: Export CSV; Search; Default sort (pending wiring).
 
 8) Roles / Role Assignments
-- [ ] Define `RoleAssignment` type with user, role, org, instance, createdAt.
-- [ ] Table columns: Assignment ID (hidden), User, Role, Org, Instance, Created At.
-- [ ] Row actions: Edit (guard against removing last admin in an org).
-- [ ] Toolbar: Export CSV; optional Import CSV; Search: User, Role, Org, Instance; Default sort Created At ↓.
+- [x] Define `RoleAssignment` type with user, role, org, instance, createdAt (demo data).
+- [x] Table columns: User, Role, Org, Instance, Created At.
+- [x] Row actions: Edit (stub).
+- [ ] Toolbar: Export CSV; optional Import CSV; Search; Default sort Created At ↓ (pending wiring).
 
 9) Categories (optional)
-- [ ] Define `Category` type with optional parent, itemsCount, status.
-- [ ] Table columns: Category ID (hidden), Name, Parent (optional), Items (#), Status (hidden by default).
-- [ ] Row actions: Edit (rename or Merge), Delete (guard if Items > 0; suggest Merge).
-- [ ] Toolbar: Create, Import CSV, Export CSV; Search: Name; Default sort Name ↑.
+- [x] Define `Category` type with optional parent, itemsCount, status (demo data).
+- [x] Table columns: Name, Parent, Items (#), Status.
+- [x] Row actions: Edit, Merge, Delete (stubs).
+- [ ] Toolbar: Create/Import/Export; Search; Default sort (pending wiring).
 
 10) Attachments (optional)
-- [ ] Define `Attachment` type with item, filename, mime, size, uploadedBy, createdAt.
-- [ ] Table columns: File ID (hidden), Item, Filename, Type (MIME), Size, Uploaded By, Created At.
-- [ ] Row actions: Download, Replace (versioned), Delete (guard if required by borrowing).
-- [ ] Toolbar: Upload, Export CSV; Search: Filename, Item; Default sort Created At ↓.
+- [x] Define `Attachment` type with item, filename, mime, size, uploadedBy, createdAt (demo data).
+- [x] Table columns: Item, Filename, Type (MIME), Size, Uploaded By, Created At.
+- [x] Row actions: Download, Replace, Delete (stubs).
+- [ ] Toolbar: Upload, Export list (CSV); Search; Default sort (pending wiring).
 
 Light Guardrails (cross-cutting)
 - [ ] Derive statuses in UI where possible (e.g., Overdue = now > due && !returned) to avoid skew.

@@ -74,6 +74,11 @@ function AppShell() {
                       <option value="items">Items</option>
                       <option value="users">Users</option>
                       <option value="borrowings">Borrowings</option>
+                      <option value="reservations">Reservations</option>
+                      <option value="penalties">Penalties</option>
+                      <option value="roles">Roles</option>
+                      <option value="categories">Categories</option>
+                      <option value="attachments">Attachments</option>
                     </Select>
                   </div>
                 </div>
@@ -105,12 +110,14 @@ function AppShell() {
         onClose={() => setShowForm(false)}
         onSubmit={() => { setShowForm(false); addToast('Saved', 'success') }}
       />
-      <CsvImportModal
-        open={showCsv}
-        entity={entity}
-        onClose={() => setShowCsv(false)}
-        onImport={(data) => { setShowCsv(false); addToast(`Imported ${data.rows.length} rows`, 'success') }}
-      />
+      {(['items','users','borrowings'] as const).includes(entity as any) && (
+        <CsvImportModal
+          open={showCsv}
+          entity={entity as 'items' | 'users' | 'borrowings'}
+          onClose={() => setShowCsv(false)}
+          onImport={(data) => { setShowCsv(false); addToast(`Imported ${data.rows.length} rows`, 'success') }}
+        />
+      )}
       <Toaster richColors position="bottom-right" />
       <ConfirmDialog
         open={confirm.open}

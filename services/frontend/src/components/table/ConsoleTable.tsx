@@ -33,6 +33,28 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
     { id: 'b2', itemId: 'i1', userId: 'u2', startDate: '2025-08-05', dueDate: '2025-08-08', returnedAt: '2025-08-08', handledBy: 'staff02', penalty: 0 },
   ]))
 
+  // Additional entities demo data
+  const [reservations] = useState(() => ([
+    { id: 'r1', itemId: 'i2', userId: 'u1', reservedFrom: '2025-08-12', reservedTo: '2025-08-15', status: 'Active', createdAt: '2025-08-10' },
+    { id: 'r2', itemId: 'i1', userId: 'u2', reservedFrom: '2025-08-20', reservedTo: '2025-08-22', status: 'Cancelled', createdAt: '2025-08-09' },
+  ]))
+  const [penalties] = useState(() => ([
+    { id: 'p1', userId: 'u1', itemId: 'i2', reason: 'Late', createdAt: '2025-08-11', untilDate: '2025-08-20', severity: 'block', status: 'Active', notes: 'Overdue 5 days' },
+    { id: 'p2', userId: 'u2', itemId: '', reason: 'Manual', createdAt: '2025-07-01', untilDate: '2025-07-10', severity: 'warn', status: 'Expired', notes: '' },
+  ]))
+  const [roles] = useState(() => ([
+    { id: 'ra1', userId: 'u1', role: 'Borrower', org: 'Org A', instance: 'Main', createdAt: '2025-08-01' },
+    { id: 'ra2', userId: 'u2', role: 'Staff', org: 'Org A', instance: 'Main', createdAt: '2025-08-01' },
+  ]))
+  const [categories] = useState(() => ([
+    { id: 'c1', name: 'Cables', parent: '', itemsCount: 10, status: 'Active' },
+    { id: 'c2', name: 'AV Equipment', parent: '', itemsCount: 3, status: 'Active' },
+  ]))
+  const [attachments] = useState(() => ([
+    { id: 'f1', itemId: 'i2', filename: 'projector-manual.pdf', mime: 'application/pdf', size: 1024000, uploadedBy: 'u2', createdAt: '2025-08-01' },
+    { id: 'f2', itemId: 'i1', filename: 'hdmi.jpg', mime: 'image/jpeg', size: 20480, uploadedBy: 'u1', createdAt: '2025-08-02' },
+  ]))
+
   const itemsById = useMemo(() => Object.fromEntries(items.map(i => [i.id, i])), [items])
   const usersById = useMemo(() => Object.fromEntries(users.map(u => [u.id, u])), [users])
 
@@ -47,6 +69,8 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
     const penalties = userBorrowings.reduce((sum, b) => sum + (b.penalty || 0), 0)
     return { currentLoans, overdue, penalties }
   }, [viewUser, borrowings])
+
+  // Filters removed per request
 
   // Derive header actions (Create / Import CSV / Export CSV) from the last child of headerContent
   let headerContentMain = headerContent
@@ -98,6 +122,7 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
 
   if (entity === 'borrowings') {
     return (
+      <>
       <DataTable
         columns={[
           { key: 'itemId', header: 'Item', render: (r: any) => itemsById[r.itemId]?.name || r.itemId },
@@ -116,6 +141,131 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
         rowKey={(r) => r.id}
         onRowAction={(a, r) => { if (a === 'return') onReturn(r); else if (a === 'edit') onEdit(r); else onDelete(r) }}
         rowActions={(r) => (r.returnedAt ? [{ id: 'edit', label: 'Edit' }, { id: 'delete', label: 'Delete' }] : [{ id: 'return', label: 'Return' }, { id: 'edit', label: 'Edit' }, { id: 'delete', label: 'Delete' }])}
+        selectedIds={selectedIds}
+        onSelectionChange={onSelectionChange}
+        headerContent={headerContentMain}
+        headerActions={headerActions}
+        search={search}
+        onSearchChange={onSearchChange}
+      />
+      </>
+    )
+  }
+
+  if (entity === 'reservations') {
+    return (
+      <DataTable
+        columns={[
+          { key: 'itemId', header: 'Item', render: (r: any) => itemsById[r.itemId]?.name || r.itemId },
+          { key: 'userId', header: 'User', render: (r: any) => usersById[r.userId]?.name || r.userId },
+          { key: 'reservedFrom', header: 'Reserved From', sortable: true },
+          { key: 'reservedTo', header: 'Reserved To', sortable: true },
+          { key: 'status', header: 'Status' },
+          { key: 'createdAt', header: 'Created At', sortable: true },
+        ]}
+        rows={reservations}
+        rowKey={(r) => r.id}
+        onRowAction={(a, r) => { void a; void r }}
+        rowActions={() => ([{ id: 'fulfill', label: 'Fulfill' }, { id: 'extend', label: 'Extend' }, { id: 'cancel', label: 'Cancel' }])}
+        selectedIds={selectedIds}
+        onSelectionChange={onSelectionChange}
+        headerContent={headerContentMain}
+        headerActions={headerActions}
+        search={search}
+        onSearchChange={onSearchChange}
+      />
+    )
+  }
+
+  if (entity === 'penalties') {
+    return (
+      <DataTable
+        columns={[
+          { key: 'userId', header: 'User', render: (r: any) => usersById[r.userId]?.name || r.userId },
+          { key: 'itemId', header: 'Item', render: (r: any) => (r.itemId ? (itemsById[r.itemId]?.name || r.itemId) : '') },
+          { key: 'reason', header: 'Reason' },
+          { key: 'createdAt', header: 'Created At', sortable: true },
+          { key: 'untilDate', header: 'Until Date', sortable: true },
+          { key: 'severity', header: 'Severity' },
+          { key: 'status', header: 'Status' },
+          { key: 'notes', header: 'Notes' },
+        ]}
+        rows={penalties}
+        rowKey={(r) => r.id}
+        onRowAction={(a, r) => { void a; void r }}
+        rowActions={() => ([{ id: 'edit', label: 'Edit' }, { id: 'remove', label: 'Remove' }])}
+        selectedIds={selectedIds}
+        onSelectionChange={onSelectionChange}
+        headerContent={headerContentMain}
+        headerActions={headerActions}
+        search={search}
+        onSearchChange={onSearchChange}
+      />
+    )
+  }
+
+  if (entity === 'roles') {
+    return (
+      <DataTable
+        columns={[
+          { key: 'userId', header: 'User', render: (r: any) => usersById[r.userId]?.name || r.userId },
+          { key: 'role', header: 'Role' },
+          { key: 'org', header: 'Org' },
+          { key: 'instance', header: 'Instance' },
+          { key: 'createdAt', header: 'Created At', sortable: true },
+        ]}
+        rows={roles}
+        rowKey={(r) => r.id}
+        onRowAction={(a, r) => { void a; void r }}
+        rowActions={() => ([{ id: 'edit', label: 'Edit' }])}
+        selectedIds={selectedIds}
+        onSelectionChange={onSelectionChange}
+        headerContent={headerContentMain}
+        headerActions={headerActions}
+        search={search}
+        onSearchChange={onSearchChange}
+      />
+    )
+  }
+
+  if (entity === 'categories') {
+    return (
+      <DataTable
+        columns={[
+          { key: 'name', header: 'Name', sortable: true, searchable: true },
+          { key: 'parent', header: 'Parent' },
+          { key: 'itemsCount', header: 'Items (#)' },
+          { key: 'status', header: 'Status', searchable: false },
+        ]}
+        rows={categories}
+        rowKey={(r) => r.id}
+        onRowAction={(a, r) => { void a; void r }}
+        rowActions={() => ([{ id: 'edit', label: 'Edit' }, { id: 'merge', label: 'Merge' }, { id: 'delete', label: 'Delete' }])}
+        selectedIds={selectedIds}
+        onSelectionChange={onSelectionChange}
+        headerContent={headerContentMain}
+        headerActions={headerActions}
+        search={search}
+        onSearchChange={onSearchChange}
+      />
+    )
+  }
+
+  if (entity === 'attachments') {
+    return (
+      <DataTable
+        columns={[
+          { key: 'itemId', header: 'Item', render: (r: any) => itemsById[r.itemId]?.name || r.itemId },
+          { key: 'filename', header: 'Filename', sortable: true },
+          { key: 'mime', header: 'Type (MIME)' },
+          { key: 'size', header: 'Size', render: (r: any) => `${Math.round((r.size || 0)/1024)} KB` },
+          { key: 'uploadedBy', header: 'Uploaded By', render: (r: any) => usersById[r.uploadedBy]?.name || r.uploadedBy },
+          { key: 'createdAt', header: 'Created At', sortable: true },
+        ]}
+        rows={attachments}
+        rowKey={(r) => r.id}
+        onRowAction={(a, r) => { void a; void r }}
+        rowActions={() => ([{ id: 'download', label: 'Download' }, { id: 'replace', label: 'Replace' }, { id: 'delete', label: 'Delete' }])}
         selectedIds={selectedIds}
         onSelectionChange={onSelectionChange}
         headerContent={headerContentMain}

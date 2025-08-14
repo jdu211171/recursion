@@ -2,7 +2,15 @@ import type { ChangeEvent } from 'react'
 import Select from '../primitives/Select'
 import Button from '../primitives/Button'
 
-export type EntityKey = 'items' | 'users' | 'borrowings'
+export type EntityKey =
+  | 'items'
+  | 'users'
+  | 'borrowings'
+  | 'reservations'
+  | 'penalties'
+  | 'roles'
+  | 'categories'
+  | 'attachments'
 
 interface Props {
   entity: EntityKey
@@ -25,6 +33,11 @@ export default function Toolbar({ entity, onEntityChange, onCreate, onImportCsv,
           <option value="items">Items</option>
           <option value="users">Users</option>
           <option value="borrowings">Borrowings</option>
+          <option value="reservations">Reservations</option>
+          <option value="penalties">Penalties</option>
+          <option value="roles">Roles</option>
+          <option value="categories">Categories</option>
+          <option value="attachments">Attachments</option>
         </Select>
         <Button variant="ghost" onClick={onToggleFilters} aria-label="Toggle filters">Filters</Button>
         <div style={{ flex: 1 }} />
