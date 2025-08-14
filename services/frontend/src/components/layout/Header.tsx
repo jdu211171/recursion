@@ -56,13 +56,11 @@ export default function Header() {
           <label className="muted" htmlFor="org">Org</label>
           <Select id="org" value={currentOrg?.id ? String(currentOrg.id) : ''} onChange={onOrg}>
             <option value="">Select org</option>
-            <option value="__create_org__">+ Create new</option>
             {organizations.map(o => <option key={o.id} value={String(o.id)}>{o.name}</option>)}
           </Select>
           <label className="muted" htmlFor="inst">Instance</label>
           <Select id="inst" value={currentInstance?.id ? String(currentInstance.id) : ''} onChange={onInst} disabled={!currentOrg}>
             <option value="">Select instance</option>
-            <option value="__create_inst__">+ Create new</option>
             {instances.map(i => <option key={i.id} value={String(i.id)}>{i.name}</option>)}
           </Select>
         </div>

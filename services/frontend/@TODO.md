@@ -8,6 +8,7 @@ General Foundations
  - [x] Extend CSV import to support strict update mode (require `id`), and dry-run preview grouping (adds/updates/errors) before commit.
  - [ ] Align CSV export to respect current selection/sort and always include hidden identifiers.
  - [ ] Add Archive pattern (Active/Archived) helpers and UI toggle; prefer archive over delete where specified.
+  - [x] Unify typography: Inter weights, base scale (h1–h4), caption/eyebrow/muted, table header/body text sizes, smoothing.
 
 Auth & Confirmation
 - [x] Add auth gate with login form using `authService`.
