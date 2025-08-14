@@ -3,6 +3,7 @@ import Checkbox from '../primitives/Checkbox'
 import Select from '../primitives/Select'
 import useTableState from './useTableState'
 import type { ReactNode } from 'react'
+import { useMemo } from 'react'
 
 interface Props<T> {
   columns: Column<T>[]
@@ -20,7 +21,9 @@ interface Props<T> {
 }
 
 export default function DataTable<T>({ columns, rows, rowKey, onRowAction, selectedIds, onSelectionChange, rowActions, loading, headerContent, headerActions, search, onSearchChange }: Props<T>) {
-  const state = useTableState(rows, { externalSearch: typeof search === 'string' ? search : undefined })
+  // Limit search to columns explicitly marked as searchable
+  const searchKeys = useMemo(() => columns.filter(c => c.searchable !== false).map(c => String(c.key)), [columns])
+  const state = useTableState(rows, { externalSearch: typeof search === 'string' ? search : undefined, searchKeys })
   const selectedSet = new Set(selectedIds ?? Array.from(state.selected))
   const allSelected = state.pageRows.every(r => selectedSet.has(rowKey(r))) && state.pageRows.length > 0
 

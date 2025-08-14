@@ -43,6 +43,43 @@ export default function CsvImportModal({ open, entity, onClose, onImport }: Prop
 
   const previewRows = (csv?.rows || []).slice(0, 5)
 
+  const dryRun = useMemo(() => {
+    if (!csv) return null as null | { adds: number; updates: number; errors: { row: number; message: string }[] }
+    const errors: { row: number; message: string }[] = []
+    let adds = 0
+    let updates = 0
+    const seenIds = new Set<string>()
+
+    for (let i = 0; i < csv.rows.length; i++) {
+      const raw = csv.rows[i]
+      const mapped: Record<string, string> = {}
+      for (const [from, to] of Object.entries(mapping)) {
+        if (!to) continue
+        mapped[to] = String(raw[from] ?? '').trim()
+      }
+      const rowNum = i + 2 // account for header row
+
+      if (importMode === 'update') {
+        const id = mapped['id']
+        if (!id) {
+          errors.push({ row: rowNum, message: 'Missing id for update' })
+          continue
+        }
+        if (seenIds.has(id)) {
+          errors.push({ row: rowNum, message: `Duplicate id in file: ${id}` })
+          continue
+        }
+        seenIds.add(id)
+        updates++
+      } else {
+        // create mode: count row as add if it has any non-empty mapped value besides id
+        const hasData = targetFields.some(tf => tf !== 'id' && (mapped[tf]?.length ?? 0) > 0)
+        if (hasData) adds++
+      }
+    }
+    return { adds, updates, errors }
+  }, [csv, mapping, importMode, targetFields])
+
   return (
     <Modal open={open} onClose={onClose} title={`Import CSV — ${entity}`}>
       <div className="field">
@@ -51,6 +88,29 @@ export default function CsvImportModal({ open, entity, onClose, onImport }: Prop
         <small className="muted">{columnsHint}</small>
       </div>
       {error && <p className="muted" role="alert">{error}</p>}
+      <div className="field" style={{ marginTop: 16 }}>
+        <label className="muted">Import Mode</label>
+        <div style={{ display: 'flex', gap: 20, marginTop: 6 }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Radio
+              name="importMode"
+              value="create"
+              checked={importMode === 'create'}
+              onChange={() => setImportMode('create')}
+            />
+            <span>Create (insert new records)</span>
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Radio
+              name="importMode"
+              value="update"
+              checked={importMode === 'update'}
+              onChange={() => setImportMode('update')}
+            />
+            <span>Update (match existing by id)</span>
+          </label>
+        </div>
+      </div>
       {csv && (
         <div style={{ marginTop: 10 }}>
           <div className="muted">Detected {csv.rows.length} rows, {csv.headers.length} columns</div>
@@ -90,29 +150,29 @@ export default function CsvImportModal({ open, entity, onClose, onImport }: Prop
               </table>
             </div>
           </div>
-        <div className="field" style={{ marginTop: 16 }}>
-          <label className="muted">Import Mode</label>
-          <div style={{ display: 'flex', gap: 20, marginTop: 6 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Radio
-                name="importMode"
-                value="create"
-                checked={importMode === 'create'}
-                onChange={() => setImportMode('create')}
-              />
-              <span>Create (insert new records)</span>
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Radio
-                name="importMode"
-                value="update"
-                checked={importMode === 'update'}
-                onChange={() => setImportMode('update')}
-              />
-              <span>Update (match existing by id)</span>
-            </label>
-          </div>
-        </div>
+
+          {/* Dry-run summary */}
+          {dryRun && (
+            <div className="card" style={{ marginTop: 10 }}>
+              <h4 style={{ marginTop: 0 }}>Dry-run summary</h4>
+              <div className="grid">
+                <div className="col-4"><strong>Adds:</strong> {dryRun.adds}</div>
+                <div className="col-4"><strong>Updates:</strong> {dryRun.updates}</div>
+                <div className="col-4"><strong>Errors:</strong> {dryRun.errors.length}</div>
+              </div>
+              {dryRun.errors.length > 0 && (
+                <div style={{ marginTop: 8 }}>
+                  <div className="muted">First few errors:</div>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {dryRun.errors.slice(0, 5).map((e, idx) => (
+                      <li key={idx}>Row {e.row}: {e.message}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
       </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
@@ -124,7 +184,7 @@ export default function CsvImportModal({ open, entity, onClose, onImport }: Prop
               onImport(payload as any)
             }
           }}
-          disabled={!csv}
+          disabled={!csv || (importMode === 'update' && (dryRun?.errors.length ?? 0) > 0)}
         >
           Commit
         </Button>

@@ -5,6 +5,8 @@ export interface Column<T> {
   header: string
   width?: number | string
   sortable?: boolean
+  // Whether this column participates in text search
+  // Defaults to true; set to false for non-text or sensitive fields
+  searchable?: boolean
   render?: CellRender<T>
 }
-

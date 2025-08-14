@@ -10,7 +10,10 @@ export interface SortState {
   dir: 'asc' | 'desc'
 }
 
-export default function useTableState<T>(rows: T[], opts?: { externalSearch?: string }) {
+export default function useTableState<T>(
+  rows: T[],
+  opts?: { externalSearch?: string; searchKeys?: string[] }
+) {
   const [pagination, setPagination] = useState<Pagination>({ page: 1, pageSize: 10 })
   const [sort, setSort] = useState<SortState>({ key: null, dir: 'asc' })
   const [selected, setSelected] = useState<Set<string | number>>(new Set())
@@ -20,8 +23,13 @@ export default function useTableState<T>(rows: T[], opts?: { externalSearch?: st
     const activeQuery = (opts?.externalSearch ?? search).trim()
     if (!activeQuery) return rows
     const q = activeQuery.toLowerCase()
+    // If searchKeys provided, only search within those keys; otherwise fallback to full JSON
+    if (opts?.searchKeys && opts.searchKeys.length > 0) {
+      const keys = opts.searchKeys
+      return rows.filter((r: any) => keys.some(k => String(r?.[k as any] ?? '').toLowerCase().includes(q)))
+    }
     return rows.filter((r) => JSON.stringify(r).toLowerCase().includes(q))
-  }, [rows, search, opts?.externalSearch])
+  }, [rows, search, opts?.externalSearch, opts?.searchKeys])
 
   const sorted = useMemo(() => {
     if (!sort.key) return filtered
