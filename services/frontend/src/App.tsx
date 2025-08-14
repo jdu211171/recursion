@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Header from './components/layout/Header'
 import type { EntityKey } from './components/layout/Toolbar'
 import ConsoleTable from './components/table/ConsoleTable'
@@ -6,6 +6,7 @@ import Overview from './pages/Overview'
 import UnifiedForm, { type FieldMeta } from './components/forms/UnifiedForm'
 import CsvImportModal from './components/forms/CsvImportModal'
 import ConfirmDialog from './components/forms/ConfirmDialog'
+import LoginForm from './components/forms/LoginForm'
 import Select from './components/primitives/Select'
 import { Toaster, toast } from 'sonner'
 import { TenantProvider } from './contexts/TenantContext'
@@ -20,8 +21,23 @@ function AppShell() {
   const [showCsv, setShowCsv] = useState(false)
   // Sonner handles toast state internally via <Toaster />
   const [selectedIds, setSelectedIds] = useState<Array<string | number>>([])
-  const [confirm, setConfirm] = useState<{ open: boolean; action: 'borrow'|'return'|null; row?: any }>({ open: false, action: null })
+  const [confirm, setConfirm] = useState<{ open: boolean; action: 'borrow'|'return'|'delete'|null; row?: any }>({ open: false, action: null })
   const [search, setSearch] = useState('')
+  const [authed, setAuthed] = useState<boolean>(() => {
+    try {
+      const token = localStorage.getItem('accessToken')
+      return !!token
+    } catch {
+      return false
+    }
+  })
+
+  // Listen for logout from Header
+  useEffect(() => {
+    const onLogout = () => setAuthed(false)
+    window.addEventListener('app:logout', onLogout)
+    return () => window.removeEventListener('app:logout', onLogout)
+  }, [])
 
   const addToast = useCallback((text: string, type: 'info'|'success'|'warning'|'error' = 'info') => {
     if (type === 'success') toast.success(text)
@@ -50,6 +66,17 @@ function AppShell() {
     ]
   }, [entity])
 
+  if (!authed) {
+    return (
+      <div className="app-shell">
+        <main className="content">
+          <LoginForm onSuccess={() => { setAuthed(true); addToast('Signed in', 'success') }} onError={(m) => addToast(m, 'error')} />
+        </main>
+        <Toaster richColors position="bottom-right" />
+      </div>
+    )
+  }
+
   return (
     <div className="app-shell">
       <Header />
@@ -62,7 +89,7 @@ function AppShell() {
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
             onEdit={(row) => { setEditRow(row); setShowForm(true) }}
-            onDelete={() => addToast('Deleted', 'success')}
+            onDelete={(row) => setConfirm({ open: true, action: 'delete', row })}
             onBorrow={(row) => setConfirm({ open: true, action: 'borrow', row })}
             onReturn={(row) => setConfirm({ open: true, action: 'return', row })}
             headerContent={
@@ -121,11 +148,15 @@ function AppShell() {
       <Toaster richColors position="bottom-right" />
       <ConfirmDialog
         open={confirm.open}
-        title={confirm.action === 'borrow' ? 'Confirm Borrow' : 'Confirm Return'}
-        message={confirm.action === 'borrow' ? 'Proceed with borrowing this item?' : 'Mark this borrowing as returned?'}
-        confirmText={confirm.action === 'borrow' ? 'Borrow' : 'Return'}
+        title={confirm.action === 'borrow' ? 'Confirm Borrow' : confirm.action === 'return' ? 'Confirm Return' : 'Confirm Delete'}
+        message={confirm.action === 'borrow' ? 'Proceed with borrowing this item?' : confirm.action === 'return' ? 'Mark this borrowing as returned?' : 'This action cannot be undone. Delete the selected record(s)?'}
+        confirmText={confirm.action === 'borrow' ? 'Borrow' : confirm.action === 'return' ? 'Return' : 'Delete'}
         onCancel={() => setConfirm({ open: false, action: null })}
-        onConfirm={() => { setConfirm({ open: false, action: null }); addToast('Updated', 'success') }}
+        onConfirm={() => {
+          setConfirm({ open: false, action: null })
+          if (confirm.action === 'delete') addToast('Deleted', 'success')
+          else addToast('Updated', 'success')
+        }}
       />
     </div>
   )

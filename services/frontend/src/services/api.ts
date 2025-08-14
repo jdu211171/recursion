@@ -36,7 +36,8 @@ export class ApiService {
           throw new Error('TOKEN_REFRESHED')
         } catch (error) {
           authService.logout()
-          window.location.href = '/login'
+          // Notify app to show login gate
+          window.dispatchEvent(new Event('app:logout'))
           throw new Error('Authentication failed')
         }
       }

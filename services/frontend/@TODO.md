@@ -9,6 +9,14 @@ General Foundations
  - [ ] Align CSV export to respect current selection/sort and always include hidden identifiers.
  - [ ] Add Archive pattern (Active/Archived) helpers and UI toggle; prefer archive over delete where specified.
 
+Auth & Confirmation
+- [x] Add auth gate with login form using `authService`.
+- [x] Add logout confirmation dialog and hook to clear tokens.
+- [x] Add confirmation dialog for destructive actions (Delete) and sensitive actions (Borrow/Return).
+- [x] Show current user in header via `authService.getUser()`.
+- [x] Global 401 handling: refresh token or force logout to login gate.
+- [x] Confirm reservations (Fulfill/Cancel) and penalties (Remove) actions.
+
 1) Organizations (Tenants)
 - [ ] Define `Organization` type with hidden `id`, name, counts, createdAt.
 - [ ] Add Organizations table route/view with columns: Org ID (hidden), Name, Instances (#), Users (#), Created At.

@@ -1,6 +1,8 @@
-import { useState, type ChangeEvent } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import Select from '../primitives/Select'
 import ThemeSwitcher from '../primitives/ThemeSwitcher'
+import ConfirmDialog from '../forms/ConfirmDialog'
+import authService, { type User } from '../../services/auth'
 import { useTenant } from '../../contexts/TenantContext'
 
 export default function Header() {
@@ -10,6 +12,7 @@ export default function Header() {
   const [showCreateInst, setShowCreateInst] = useState(false)
   const [newOrgName, setNewOrgName] = useState('')
   const [newInstName, setNewInstName] = useState('')
+  const [user, setUser] = useState<User | null>(null)
 
 
   const onOrg = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -32,6 +35,16 @@ export default function Header() {
     setCurrentInstance(inst)
   }
 
+  const [confirmLogout, setConfirmLogout] = useState(false)
+
+  useEffect(() => {
+    try {
+      setUser(authService.getUser())
+    } catch {
+      setUser(null)
+    }
+  }, [])
+
   return (
     <div className="app-header">
       <div>
@@ -53,34 +66,46 @@ export default function Header() {
             {instances.map(i => <option key={i.id} value={String(i.id)}>{i.name}</option>)}
           </Select>
         </div>
+        <div className="muted" title={user?.email || ''} aria-label="Current user">
+          {user ? `${user.firstName ? user.firstName : ''} ${user.lastName ? user.lastName : ''}`.trim() || user.email : ''}
+        </div>
         <ThemeSwitcher />
-        <button 
-          className="btn" 
-          onClick={() => {
-            // TODO: Implement logout logic
-            console.log('Logout clicked')
-          }}
+        <button
+          className="btn"
+          onClick={() => setConfirmLogout(true)}
           aria-label="Logout"
           title="Logout"
-          style={{ 
-            padding: '6px 10px', 
+          style={{
+            padding: '6px 10px',
             marginLeft: 8,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}
         >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            strokeWidth={1.5} 
-            stroke="currentColor" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
             style={{ width: 18, height: 18, display: 'block' }}
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
           </svg>
         </button>
+        <ConfirmDialog
+          open={confirmLogout}
+          title="Confirm Logout"
+          message="Are you sure you want to log out?"
+          confirmText="Logout"
+          onCancel={() => setConfirmLogout(false)}
+          onConfirm={() => {
+            setConfirmLogout(false)
+            authService.logout()
+            window.dispatchEvent(new Event('app:logout'))
+          }}
+        />
       </div>
 
       {showCreateOrg && (

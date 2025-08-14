@@ -3,6 +3,8 @@ import type { ReactNode } from 'react'
 import DataTable from './DataTable'
 import type { EntityKey } from '../layout/Toolbar'
 import Modal from '../primitives/Modal'
+import ConfirmDialog from '../forms/ConfirmDialog'
+import { toast } from 'sonner'
 
 interface Props {
   entity: EntityKey
@@ -54,6 +56,9 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
     { id: 'f1', itemId: 'i2', filename: 'projector-manual.pdf', mime: 'application/pdf', size: 1024000, uploadedBy: 'u2', createdAt: '2025-08-01' },
     { id: 'f2', itemId: 'i1', filename: 'hdmi.jpg', mime: 'image/jpeg', size: 20480, uploadedBy: 'u1', createdAt: '2025-08-02' },
   ]))
+
+  // Local confirmation dialog for sensitive actions
+  const [localConfirm, setLocalConfirm] = useState<{ open: boolean; title: string; message: string; onConfirm?: () => void }>({ open: false, title: '', message: '' })
 
   const itemsById = useMemo(() => Object.fromEntries(items.map(i => [i.id, i])), [items])
   const usersById = useMemo(() => Object.fromEntries(users.map(u => [u.id, u])), [users])
@@ -154,6 +159,7 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
 
   if (entity === 'reservations') {
     return (
+      <>
       <DataTable
         columns={[
           { key: 'itemId', header: 'Item', render: (r: any) => itemsById[r.itemId]?.name || r.itemId },
@@ -165,7 +171,15 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
         ]}
         rows={reservations}
         rowKey={(r) => r.id}
-        onRowAction={(a, r) => { void a; void r }}
+        onRowAction={(a, _r) => {
+          if (a === 'fulfill') {
+            setLocalConfirm({ open: true, title: 'Fulfill Reservation', message: 'Convert this reservation into a borrowing?', onConfirm: () => { setLocalConfirm({ open: false, title: '', message: '' }); toast.success('Reservation fulfilled') } })
+          } else if (a === 'cancel') {
+            setLocalConfirm({ open: true, title: 'Cancel Reservation', message: 'Are you sure you want to cancel this reservation?', onConfirm: () => { setLocalConfirm({ open: false, title: '', message: '' }); toast.success('Reservation cancelled') } })
+          } else if (a === 'extend') {
+            toast.info('Extend flow pending policy wiring')
+          }
+        }}
         rowActions={() => ([{ id: 'fulfill', label: 'Fulfill' }, { id: 'extend', label: 'Extend' }, { id: 'cancel', label: 'Cancel' }])}
         selectedIds={selectedIds}
         onSelectionChange={onSelectionChange}
@@ -174,11 +188,21 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
         search={search}
         onSearchChange={onSearchChange}
       />
+      <ConfirmDialog
+        open={localConfirm.open}
+        title={localConfirm.title}
+        message={localConfirm.message}
+        confirmText="Confirm"
+        onCancel={() => setLocalConfirm({ open: false, title: '', message: '' })}
+        onConfirm={() => { localConfirm.onConfirm?.() }}
+      />
+      </>
     )
   }
 
   if (entity === 'penalties') {
     return (
+      <>
       <DataTable
         columns={[
           { key: 'userId', header: 'User', render: (r: any) => usersById[r.userId]?.name || r.userId },
@@ -192,7 +216,13 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
         ]}
         rows={penalties}
         rowKey={(r) => r.id}
-        onRowAction={(a, r) => { void a; void r }}
+        onRowAction={(a, _r) => {
+          if (a === 'remove') {
+            setLocalConfirm({ open: true, title: 'Remove Penalty', message: 'Remove this penalty record? This action may leave an audit tombstone.', onConfirm: () => { setLocalConfirm({ open: false, title: '', message: '' }); toast.success('Penalty removed') } })
+          } else if (a === 'edit') {
+            onEdit(_r)
+          }
+        }}
         rowActions={() => ([{ id: 'edit', label: 'Edit' }, { id: 'remove', label: 'Remove' }])}
         selectedIds={selectedIds}
         onSelectionChange={onSelectionChange}
@@ -201,6 +231,15 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
         search={search}
         onSearchChange={onSearchChange}
       />
+      <ConfirmDialog
+        open={localConfirm.open}
+        title={localConfirm.title}
+        message={localConfirm.message}
+        confirmText="Confirm"
+        onCancel={() => setLocalConfirm({ open: false, title: '', message: '' })}
+        onConfirm={() => { localConfirm.onConfirm?.() }}
+      />
+      </>
     )
   }
 
@@ -216,7 +255,7 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
         ]}
         rows={roles}
         rowKey={(r) => r.id}
-        onRowAction={(a, r) => { void a; void r }}
+        onRowAction={(_a, _r) => { /* no-op */ }}
         rowActions={() => ([{ id: 'edit', label: 'Edit' }])}
         selectedIds={selectedIds}
         onSelectionChange={onSelectionChange}
@@ -230,6 +269,7 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
 
   if (entity === 'categories') {
     return (
+      <>
       <DataTable
         columns={[
           { key: 'name', header: 'Name', sortable: true, searchable: true },
@@ -239,7 +279,15 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
         ]}
         rows={categories}
         rowKey={(r) => r.id}
-        onRowAction={(a, r) => { void a; void r }}
+        onRowAction={(a, r) => {
+          if (a === 'delete') {
+            setLocalConfirm({ open: true, title: 'Delete Category', message: 'Delete this category? Consider merging instead if it has items.', onConfirm: () => { setLocalConfirm({ open: false, title: '', message: '' }); toast.success('Category deleted') } })
+          } else if (a === 'merge') {
+            setLocalConfirm({ open: true, title: 'Merge Category', message: 'Merge this category into another? You will need to choose a target in a future step.', onConfirm: () => { setLocalConfirm({ open: false, title: '', message: '' }); toast.success('Category merge initiated') } })
+          } else if (a === 'edit') {
+            onEdit(r)
+          }
+        }}
         rowActions={() => ([{ id: 'edit', label: 'Edit' }, { id: 'merge', label: 'Merge' }, { id: 'delete', label: 'Delete' }])}
         selectedIds={selectedIds}
         onSelectionChange={onSelectionChange}
@@ -248,11 +296,21 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
         search={search}
         onSearchChange={onSearchChange}
       />
+      <ConfirmDialog
+        open={localConfirm.open}
+        title={localConfirm.title}
+        message={localConfirm.message}
+        confirmText="Confirm"
+        onCancel={() => setLocalConfirm({ open: false, title: '', message: '' })}
+        onConfirm={() => { localConfirm.onConfirm?.() }}
+      />
+      </>
     )
   }
 
   if (entity === 'attachments') {
     return (
+      <>
       <DataTable
         columns={[
           { key: 'itemId', header: 'Item', render: (r: any) => itemsById[r.itemId]?.name || r.itemId },
@@ -264,7 +322,15 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
         ]}
         rows={attachments}
         rowKey={(r) => r.id}
-        onRowAction={(a, r) => { void a; void r }}
+        onRowAction={(a, _r) => {
+          if (a === 'delete') {
+            setLocalConfirm({ open: true, title: 'Delete File', message: 'Delete this attachment? Ensure no active borrowing requires it.', onConfirm: () => { setLocalConfirm({ open: false, title: '', message: '' }); toast.success('Attachment deleted') } })
+          } else if (a === 'replace') {
+            toast.info('Replace flow will allow uploading a new version')
+          } else if (a === 'download') {
+            toast.info('Downloading…')
+          }
+        }}
         rowActions={() => ([{ id: 'download', label: 'Download' }, { id: 'replace', label: 'Replace' }, { id: 'delete', label: 'Delete' }])}
         selectedIds={selectedIds}
         onSelectionChange={onSelectionChange}
@@ -273,6 +339,15 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
         search={search}
         onSearchChange={onSearchChange}
       />
+      <ConfirmDialog
+        open={localConfirm.open}
+        title={localConfirm.title}
+        message={localConfirm.message}
+        confirmText="Confirm"
+        onCancel={() => setLocalConfirm({ open: false, title: '', message: '' })}
+        onConfirm={() => { localConfirm.onConfirm?.() }}
+      />
+      </>
     )
   }
 
@@ -364,3 +439,7 @@ function UserViewModal({ open, onClose, user, kpis, borrowings, itemsById }: { o
     </Modal>
   )
 }
+
+// Local confirm dialog component usage
+// Render once at the end so it’s available for all entity branches
+// Note: We cannot place JSX after return, so export a wrapper would be needed.

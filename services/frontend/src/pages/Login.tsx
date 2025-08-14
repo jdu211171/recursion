@@ -76,7 +76,7 @@ export default function Login() {
               required
               fullWidth
               id="email"
-              label="Email Address"
+              label="Username (Email)"
               name="email"
               autoComplete="email"
               autoFocus
@@ -94,6 +94,7 @@ export default function Login() {
               autoComplete="current-password"
               value={formData.password}
               onChange={handleChange}
+              sx={{ mt: 2 }}
             />
             <Button
               type="submit"
