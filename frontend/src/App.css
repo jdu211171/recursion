@@ -1,104 +1,42 @@
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Header */
-.app-header {
-  background-color: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  padding: var(--spacing-md) var(--spacing-lg);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: var(--shadow-sm);
-}
-
-.app-header h1 {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  margin: 0;
-}
-
-.header-controls {
-  display: flex;
-  gap: var(--spacing-lg);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-/* Main content */
-.app-main {
-  flex: 1;
-  padding: var(--spacing-lg);
-  max-width: 1400px;
-  width: 100%;
+#root {
+  max-width: 1280px;
   margin: 0 auto;
-}
-
-/* Toolbar */
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-lg);
-}
-
-.toolbar h2 {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  margin: 0;
-}
-
-.toolbar-actions {
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
-/* Content area */
-.content {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.table-container {
-  padding: var(--spacing-xl);
+  padding: 2rem;
   text-align: center;
 }
 
-.table-container p {
-  margin-bottom: var(--spacing-md);
-  color: var(--color-text-secondary);
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .app-header {
-    flex-direction: column;
-    gap: var(--spacing-md);
-    text-align: center;
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
   }
-  
-  .header-controls {
-    flex-direction: column;
-    gap: var(--spacing-xs);
+  to {
+    transform: rotate(360deg);
   }
-  
-  .toolbar {
-    flex-direction: column;
-    gap: var(--spacing-md);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
   }
-  
-  .toolbar-actions {
-    width: 100%;
-    flex-wrap: wrap;
-  }
-  
-  .toolbar-actions button {
-    flex: 1;
-    min-width: 120px;
-  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
 }
