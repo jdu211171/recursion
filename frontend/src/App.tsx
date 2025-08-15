@@ -625,8 +625,8 @@ function App() {
         <div className="fixed top-4 right-4 z-50">
           <ThemeToggle />
         </div>
-        <div className="container mx-auto py-10 @container/main">
-          <h1 className="text-3xl font-bold mb-8">Data Table Example</h1>
+        <div className="container mx-auto py-10">
+          <h1 className="text-3xl font-bold mb-8">Document Sections</h1>
           <DataTable data={data} />
         </div>
       </div>
