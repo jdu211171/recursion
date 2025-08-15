@@ -6,6 +6,8 @@ import Overview from './pages/Overview'
 import UnifiedForm, { type FieldMeta } from './components/forms/UnifiedForm'
 import CsvImportModal from './components/forms/CsvImportModal'
 import ConfirmDialog from './components/forms/ConfirmDialog'
+import BorrowConfirmModal from './components/forms/BorrowConfirmModal'
+import ReturnConfirmModal from './components/forms/ReturnConfirmModal'
 import LoginForm from './components/forms/LoginForm'
 import Select from './components/primitives/Select'
 import { Toaster, toast } from 'sonner'
@@ -146,18 +148,35 @@ function AppShell() {
         />
       )}
       <Toaster richColors position="bottom-right" />
-      <ConfirmDialog
-        open={confirm.open}
-        title={confirm.action === 'borrow' ? 'Confirm Borrow' : confirm.action === 'return' ? 'Confirm Return' : 'Confirm Delete'}
-        message={confirm.action === 'borrow' ? 'Proceed with borrowing this item?' : confirm.action === 'return' ? 'Mark this borrowing as returned?' : 'This action cannot be undone. Delete the selected record(s)?'}
-        confirmText={confirm.action === 'borrow' ? 'Borrow' : confirm.action === 'return' ? 'Return' : 'Delete'}
-        onCancel={() => setConfirm({ open: false, action: null })}
-        onConfirm={() => {
-          setConfirm({ open: false, action: null })
-          if (confirm.action === 'delete') addToast('Deleted', 'success')
-          else addToast('Updated', 'success')
-        }}
-      />
+      {/* Borrow uses a richer modal; others use simple confirm */}
+      {confirm.action === 'borrow' ? (
+        <BorrowConfirmModal
+          open={confirm.open}
+          item={confirm.row ? { id: String(confirm.row.id), name: String(confirm.row.name || confirm.row.title || 'Unknown'), availableCount: Number(confirm.row.availableCount ?? 0) } : null}
+          onClose={() => setConfirm({ open: false, action: null })}
+          onSuccess={() => addToast('Borrowed', 'success')}
+        />
+      ) : confirm.action === 'return' ? (
+        <ReturnConfirmModal
+          open={confirm.open}
+          borrowing={confirm.row ? { id: String(confirm.row.id), itemId: String(confirm.row.itemId || ''), userId: String(confirm.row.userId || ''), dueDate: String(confirm.row.dueDate || '') } : null}
+          onClose={() => setConfirm({ open: false, action: null })}
+          onSuccess={() => addToast('Returned', 'success')}
+        />
+      ) : (
+        <ConfirmDialog
+          open={confirm.open}
+          title={'Confirm Delete'}
+          message={'This action cannot be undone. Delete the selected record(s)?'}
+          confirmText={'Delete'}
+          onCancel={() => setConfirm({ open: false, action: null })}
+          onConfirm={() => {
+            setConfirm({ open: false, action: null })
+            if (confirm.action === 'delete') addToast('Deleted', 'success')
+            else addToast('Updated', 'success')
+          }}
+        />
+      )}
     </div>
   )
 }

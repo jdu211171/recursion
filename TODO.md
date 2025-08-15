@@ -5,6 +5,10 @@
 ● Under Review Tasks
 ※ Development Rules and Notes
 ✓ Task Completion Reports
+- Auth service: Added API docs via Redocly Elements
+  - New `services/auth/openapi.yaml` covering core auth endpoints
+  - `/docs` serves interactive docs with Try It; `/openapi.yaml` serves the spec
+  - No new dependencies; CDN assets used per project proxy guidance
 > Task Fixes
 ~ Bugs and Issues
 ✅ Completed Tasks
@@ -19,6 +23,11 @@
 - Responsiveness: Implement a fluid layout that degrades gracefully from desktop to mobile; test at 360px, 768px, 1200px.
 - Service integration: Reuse existing service functions via Vite proxy; avoid absolute URLs with ports; keep auth+tenant contexts.
 - Progressive migration: Remove MUI imports incrementally while keeping TypeScript green and the app buildable on Bun.
+
+- Borrowing UX: Flexible due-date presets
+  - Allow users to choose from presets, create/delete presets, and set a default
+  - Persist presets per org in localStorage; seed with org default (via configurationsService) when available
+  - Add preset chips under date picker (+7d, +14d default, +30d) and a Manage Presets inline editor
 
 - One‑Screen Table Console Plan
   - Central table for Users, Items, Orgs, Instances, Roles, Blacklists, Borrowings/Returns, Reservations, Categories, Attachments.
@@ -72,11 +81,35 @@
 ~ Bugs and Issues
 - Extensive MUI usage across many files; importing any of them into the new entry breaks the "no MUI" constraint. Mitigation: keep legacy files but avoid importing them.
 - Current `src/main.tsx` does not import `index.css`. Fix by importing global CSS explicitly.
+- Items > Borrow flow lacked a borrower selector; only free-text fields were present, making it unclear whom the item is assigned to.
 
 > Task Fixes
 - N/A
+ - Frontend: Added borrower Autocomplete to Borrow modal (Items flow), wired to `usersService.getUsers`, prefills name/ID, and passes `userId` to `lendingService.checkout`. Preset quick dates and DatePicker remain intact.
+- Frontend: Implemented non‑MUI `BorrowConfirmModal` used by the new Console Confirm Borrow flow in `App.tsx`: includes borrower search+select, due date with preset chips (+7,+14 default,+30), validates inputs, and calls `lendingService.checkout`.
+- Frontend: Added reusable `Combobox` primitive with keyboard navigation, async search, and accessible listbox; integrated into `BorrowConfirmModal` for a better Select Borrower experience.
+- Frontend: Added `ReturnConfirmModal` for Borrowings entity. Allows selecting an existing penalty reason or creating one inline, persists reasons per-org in localStorage, appends penalty record to a local penalties list, and calls `lendingService.return` with notes.
+ - Frontend: Borrowings table now always shows a Return action for every row; ReturnConfirmModal lets Admin/Staff choose between normal return or return with penalty.
 
 ✓ Task Completion Reports
+- Enhanced preset management in BorrowConfirmModal:
+  - Added last used preset tracking with localStorage persistence
+  - Visual indicators show active preset (solid button)
+  - Added confirmation dialog for preset deletion
+- Simplified preset management UI:
+  - Removed manage section for direct inline editing
+  - Added × remove icons on custom preset buttons
+  - Inline number input + button for adding new presets
+  - Removed unnecessary default/star indicators (active state is enough)
+- Made presets fully optional:
+  - Removed all built-in presets (7, 14, 30 days)
+  - Users manually select due date or create their own presets
+  - Empty preset state handled gracefully
+- Implemented flexible due-date presets in borrow modal:
+  - Added localStorage-backed presets with default selection and per-org key
+  - Seeded with org default (maxLendingDays) when available; fallback to 14d
+  - Added preset chips and an inline manager to add/remove/set default
+  - Applied preset choice to initialize due date on open
 - Extracted ConsoleTable into own component at `src/components/table/ConsoleTable.tsx` and updated `App.tsx` to use it.
 - Fixed DataTable controlled search to apply pre-pagination via `useTableState` externalSearch option; result count now reflects total filtered rows.
 - Migrated toast system to Sonner: added `<Toaster />`, replaced local toast state with `toast.*` calls, imported `sonner/dist/styles.css`, and removed old `src/components/primitives/Toast.tsx`.

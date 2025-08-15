@@ -83,7 +83,8 @@
       "Bash(PGPASSWORD=postgres bun --cwd \"/Users/muhammadnurislomtukhtamishhoji-zoda/Development/recursion/services/business-logic\" prisma db pull)",
       "Bash(psql:*)",
       "Bash(echo $SHELL)",
-      "Bash(./seed-all.sh:*)"
+      "Bash(./seed-all.sh:*)",
+      "Bash(tsc --noEmit)"
     ],
     "deny": []
   }

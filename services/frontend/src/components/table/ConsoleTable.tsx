@@ -145,7 +145,7 @@ export default function ConsoleTable({ entity, onEdit, onDelete, onBorrow, onRet
         rows={borrowings}
         rowKey={(r) => r.id}
         onRowAction={(a, r) => { if (a === 'return') onReturn(r); else if (a === 'edit') onEdit(r); else onDelete(r) }}
-        rowActions={(r) => (r.returnedAt ? [{ id: 'edit', label: 'Edit' }, { id: 'delete', label: 'Delete' }] : [{ id: 'return', label: 'Return' }, { id: 'edit', label: 'Edit' }, { id: 'delete', label: 'Delete' }])}
+        rowActions={() => ([{ id: 'return', label: 'Return' }, { id: 'edit', label: 'Edit' }, { id: 'delete', label: 'Delete' }])}
         selectedIds={selectedIds}
         onSelectionChange={onSelectionChange}
         headerContent={headerContentMain}

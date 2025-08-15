@@ -147,7 +147,7 @@ class UsersService extends ApiService {
     await this.post(`/users/${userId}/blacklist`, { action: 'remove' })
   }
 
-  private async getUserBlacklistStatus(userId: string): Promise<any> {
+  private async getUserBlacklistStatus(_userId: string): Promise<any> {
     // This would need a backend endpoint to check current blacklist status
     // For now, returning null
     return null
