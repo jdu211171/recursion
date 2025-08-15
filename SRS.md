@@ -208,11 +208,30 @@ Stack for each service:
     - **Rule 6: Foster Collaboration and Retrospectives** – Hold cross-team reviews in Agile sprints; document APIs (e.g., via Swagger) for easy onboarding; learn from deployments by analyzing post-mortems.
     - **Rule 7: Manage Data Consistency** – Use eventual consistency for async ops; transactions within services for critical flows (e.g., lending + penalty calc); backup databases regularly with tenant isolation in mind.
 
-## Initial Setup and Admin User
 
-For initial deployment:
-1. The database schema includes seeders for creating an initial organization "City University Library"
-2. Default admin credentials should be created with the email admin@cityuniversitylibrary.com
-3. The initial user MUST have the 'ADMIN' role to access organization management features
-4. Use the SQL script at `infrastructure/db-init/update-admin-role.sql` to promote users to admin role
-5. After role updates, users must log out and log back in to receive updated JWT tokens
+### Role Definitions & Permissions
+1. **SuperAdmin (System Administrator)**
+   - Create/delete organizations
+   - Assign/unassign **Admins** to organizations
+   - View system-wide metrics (no access to organization-specific data)
+   - Cannot interact with instances/items/borrowers directly
+
+2. **Admin (Organization Administrator)**
+   - Create/delete instances within their organization
+   - Assign **Staff** to specific instances
+   - Set organization-wide policies (penalty rules, blacklist thresholds)
+   - View all data within their organization
+   - Cannot create borrowers (delegated to Staff)
+
+3. **Staff (Instance Manager)**
+   - Manage items within assigned instances (CRUD operations)
+   - Create/enable/disable **Borrowers** for their instances
+   - Process lending/returns/reservations
+   - Apply penalties and override blacklists within their instances
+   - Attach files to item records
+
+4. **Borrower**
+   - View available items in **enabled instances**
+   - Reserve/borrow items from assigned instances
+   - View personal borrowing history/penalties
+   - No access to admin features or other borrowers' data

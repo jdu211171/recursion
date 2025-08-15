@@ -23,6 +23,30 @@
 
 ---
 
+■ New Tasks (High-Level Architectural Suggestions)
+- Implement a Comprehensive Testing Strategy: Your SRS mentions testing, but the project lacks test files. A scalable application requires a strong safety net.
+  ・Subtasks
+  - Add unit tests for critical logic within each microservice (e.g., auth token generation, business logic calculations).
+  - Create integration tests (`infrastructure/integration-test.sh`) to verify interactions between services (e.g., does creating a user in `auth` correctly link to `business-logic`?).
+  - Write end-to-end (E2E) tests to simulate user flows through the UI (e.g., logging in, borrowing an item, and seeing it in the borrowings list).
+- Establish a CI/CD Pipeline: Your SRS mentions a goal for automated deployment, but the design is not yet decided. This is a core DevOps practice.
+  ・Subtasks
+  - Create a basic CI workflow in GitHub Actions (or your preferred provider).
+  - The workflow should automatically run linting and all tests on every push to the main branch.
+  - Add a step to build Docker images for each service upon a successful test run.
+  - Plan for a CD (Continuous Deployment) step to automatically deploy to a staging or production environment.
+- Implement Centralized Logging and Monitoring: Your SRS mentions this as a requirement. For a microservices architecture, it's crucial for debugging and observing system health.
+  ・Subtasks
+  - Choose a logging stack (e.g., ELK Stack, Grafana Loki).
+  - Instrument each service to send structured logs (e.g., JSON format) to the centralized logging service.
+  - Set up basic monitoring dashboards to track key metrics like API response times, error rates, and database connections per service.
+- Formalize Configuration and Secrets Management: You have a good start with `.env.example`.
+  ・Subtasks
+  - Ensure all environment-specific variables are documented in `.env.example` for each service.
+  - For production, use a secure secret management tool (e.g., Docker Secrets, HashiCorp Vault, or cloud provider's secret manager) instead of environment variables for sensitive data like database passwords and JWT secrets.
+
+---
+
 ■ New Tasks
 - Frontend redesign (no MUI): Replace Material UI and router with an in-page SPA using custom components and styles derived from root `index.html`.
 - Design tokens: Extract fonts, colors, borders, shadows, and motion from root `index.html` and define global CSS variables in `services/frontend/src/index.css`.
@@ -92,7 +116,11 @@
 - Items > Borrow flow lacked a borrower selector; only free-text fields were present, making it unclear whom the item is assigned to.
 
 > Task Fixes
-- N/A
+- Auth service: Fixed users controller and tests
+  - Completed `services/auth/src/routes/users.ts` (constructor injection for bcrypt, finished methods, added router export)
+  - `updateUser` now returns only updated fields; added bcrypt fallback to avoid undefined in tests
+  - Removed duplicate property in `services/auth/src/routes/users.test.ts`
+  - Verified all auth tests pass via `bun test`
  - Frontend: Added borrower Autocomplete to Borrow modal (Items flow), wired to `usersService.getUsers`, prefills name/ID, and passes `userId` to `lendingService.checkout`. Preset quick dates and DatePicker remain intact.
 - Frontend: Implemented non‑MUI `BorrowConfirmModal` used by the new Console Confirm Borrow flow in `App.tsx`: includes borrower search+select, due date with preset chips (+7,+14 default,+30), validates inputs, and calls `lendingService.checkout`.
 - Frontend: Added reusable `Combobox` primitive with keyboard navigation, async search, and accessible listbox; integrated into `BorrowConfirmModal` for a better Select Borrower experience.

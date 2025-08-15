@@ -39,6 +39,14 @@ interface UpdateItemData {
 }
 
 export class ItemService {
+  private prisma: PrismaClient;
+  private itemHistoryService: typeof itemHistoryService;
+
+  constructor(db: PrismaClient, historyService: typeof itemHistoryService) {
+    this.prisma = db;
+    this.itemHistoryService = historyService;
+  }
+
   // Generate unique ID with prefix
   private generateUniqueId(prefix: string = 'ITM'): string {
     const timestamp = Date.now().toString(36);
@@ -59,7 +67,7 @@ export class ItemService {
 
     // Verify category belongs to tenant if provided
     if (categoryId) {
-      const category = await prisma.category.findFirst({
+      const category = await this.prisma.category.findFirst({
         where: {
           id: categoryId,
           orgId: context.orgId,
@@ -73,7 +81,7 @@ export class ItemService {
     }
 
     // Create item with aggregate counts
-    const item = await prisma.item.create({
+    const item = await this.prisma.item.create({
       data: {
         uniqueId: uniqueId || this.generateUniqueId(),
         name,
@@ -92,7 +100,7 @@ export class ItemService {
 
     // Log item creation
     try {
-      await itemHistoryService.logItemCreation(item.id, context.userId, {
+      await this.itemHistoryService.logItemCreation(item.id, context.userId, {
         name: item.name,
         uniqueId: item.uniqueId,
         totalCount: item.totalCount,
@@ -127,7 +135,7 @@ export class ItemService {
     };
 
     const [items, total] = await Promise.all([
-      prisma.item.findMany({
+      this.prisma.item.findMany({
         where,
         skip,
         take: limit,
@@ -146,7 +154,7 @@ export class ItemService {
         },
         orderBy: { createdAt: 'desc' }
       }),
-      prisma.item.count({ where })
+      this.prisma.item.count({ where })
     ]);
 
     return {
@@ -165,7 +173,7 @@ export class ItemService {
   }
 
   async getItemById(id: string, context: TenantContext) {
-    const item = await prisma.item.findFirst({
+    const item = await this.prisma.item.findFirst({
       where: {
         id,
         orgId: context.orgId,
@@ -201,7 +209,7 @@ export class ItemService {
     const { name, description, categoryId, totalCount, availableCount, metadata } = data;
 
     // Verify item belongs to tenant
-    const existing = await prisma.item.findFirst({
+    const existing = await this.prisma.item.findFirst({
       where: {
         id,
         orgId: context.orgId,
@@ -215,7 +223,7 @@ export class ItemService {
 
     // Verify new category if provided
     if (categoryId !== undefined && categoryId !== null) {
-      const category = await prisma.category.findFirst({
+      const category = await this.prisma.category.findFirst({
         where: {
           id: categoryId,
           orgId: context.orgId,
@@ -274,7 +282,7 @@ export class ItemService {
       updateData.availableCount = availableCount;
     }
 
-    const updated = await prisma.item.update({
+    const updated = await this.prisma.item.update({
       where: { id },
       data: updateData,
       include: {
@@ -303,7 +311,7 @@ export class ItemService {
       }
 
       if (Object.keys(changes).length > 0) {
-        await itemHistoryService.logItemUpdate(id, context.userId, changes, { 
+        await this.itemHistoryService.logItemUpdate(id, context.userId, changes, { 
           orgId: context.orgId, 
           instanceId: context.instanceId 
         });
@@ -318,7 +326,7 @@ export class ItemService {
 
   async deleteItem(id: string, context: TenantContext) {
     // Verify item belongs to tenant
-    const item = await prisma.item.findFirst({
+    const item = await this.prisma.item.findFirst({
       where: {
         id,
         orgId: context.orgId,
@@ -352,13 +360,13 @@ export class ItemService {
       throw new AppError('Cannot delete item with active reservations', 400);
     }
 
-    await prisma.item.delete({
+    await this.prisma.item.delete({
       where: { id }
     });
 
     // Log item deletion
     try {
-      await itemHistoryService.createHistoryEntry({
+      await this.itemHistoryService.createHistoryEntry({
         itemId: id,
         userId: context.userId,
         action: 'deleted',
@@ -376,7 +384,7 @@ export class ItemService {
 
   // Helper method to check if an item can be borrowed
   async canBorrow(itemId: string, quantity: number = 1): Promise<boolean> {
-    const item = await prisma.item.findUnique({
+    const item = await this.prisma.item.findUnique({
       where: { id: itemId }
     });
 
@@ -389,7 +397,7 @@ export class ItemService {
 
   // Helper method to update available count (used by lending service)
   async updateAvailableCount(itemId: string, delta: number) {
-    const item = await prisma.item.update({
+    const item = await this.prisma.item.update({
       where: { id: itemId },
       data: {
         availableCount: {
@@ -407,4 +415,4 @@ export class ItemService {
   }
 }
 
-export const itemService = new ItemService();
+export const itemService = new ItemService(prisma, itemHistoryService);
