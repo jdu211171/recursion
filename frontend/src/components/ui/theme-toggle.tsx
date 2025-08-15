@@ -9,8 +9,12 @@ interface ThemeToggleProps {
   variant?: "light" | "dark"
 }
 
-export function ThemeToggle({ onThemeChange, variant = "dark" }: ThemeToggleProps) {
+export function ThemeToggle({ onThemeChange, variant }: ThemeToggleProps) {
   const { theme, setTheme } = useTheme()
+
+  // Automatically adapt the toggle's own styling to the active theme
+  // unless an explicit variant prop is provided.
+  const effectiveVariant: "light" | "dark" = variant ? variant : (theme === "light" ? "light" : "dark")
 
   const handleThemeChange = (next: Theme) => {
     setTheme(next)
@@ -18,18 +22,18 @@ export function ThemeToggle({ onThemeChange, variant = "dark" }: ThemeToggleProp
   }
 
   const containerClasses =
-    variant === "light"
-      ? "flex p-0.5 rounded-lg border border-gray-300 bg-gray-100 w-fit gap-1 items-center"
-      : "flex p-0.5 rounded-lg border border-gray-700 bg-gray-800 w-fit gap-1 items-center"
+    effectiveVariant === "light"
+      ? "flex p-0.5 rounded-lg border border-gray-200 bg-white shadow-sm w-fit gap-1 items-center"
+      : "flex p-0.5 rounded-lg border border-zinc-700 bg-zinc-800 w-fit gap-1 items-center"
 
   const getButtonClasses = (isSelected: boolean) => {
-    if (variant === "light") {
-      return `w-5 h-[18px] grid place-items-center hover:text-gray-900 cursor-pointer rounded-md transition-colors ${
-        isSelected ? "text-gray-900 bg-white shadow-sm" : "text-gray-500"
+    if (effectiveVariant === "light") {
+      return `w-5 h-[18px] grid place-items-center hover:text-gray-800 cursor-pointer rounded-md transition-colors ${
+        isSelected ? "text-gray-900 bg-gray-50 shadow-sm" : "text-gray-500 hover:bg-gray-100"
       }`
     } else {
       return `w-5 h-[18px] grid place-items-center hover:text-white cursor-pointer rounded-md transition-colors ${
-        isSelected ? "text-white bg-gray-700" : "text-gray-400"
+        isSelected ? "text-white bg-zinc-700" : "text-zinc-400 hover:bg-zinc-700/50"
       }`
     }
   }
@@ -42,7 +46,7 @@ export function ThemeToggle({ onThemeChange, variant = "dark" }: ThemeToggleProp
       <span className={getButtonClasses(theme === "light")}>
         <input
           aria-label="light"
-            id="light"
+          id="light"
           className="sr-only"
           type="radio"
           value="light"
