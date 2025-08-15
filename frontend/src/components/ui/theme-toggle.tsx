@@ -1,21 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import { useTheme } from "@/hooks/use-theme"
 
 type Theme = "light" | "dark" | "system"
 
 interface ThemeToggleProps {
-  defaultTheme?: Theme
   onThemeChange?: (theme: Theme) => void
   variant?: "light" | "dark"
 }
 
-export function ThemeToggle({ defaultTheme = "dark", onThemeChange, variant = "dark" }: ThemeToggleProps) {
-  const [selectedTheme, setSelectedTheme] = useState<Theme>(defaultTheme)
+export function ThemeToggle({ onThemeChange, variant = "dark" }: ThemeToggleProps) {
+  const { theme, setTheme } = useTheme()
 
-  const handleThemeChange = (theme: Theme) => {
-    setSelectedTheme(theme)
-    onThemeChange?.(theme)
+  const handleThemeChange = (next: Theme) => {
+    setTheme(next)
+    onThemeChange?.(next)
   }
 
   const containerClasses =
@@ -40,15 +39,15 @@ export function ThemeToggle({ defaultTheme = "dark", onThemeChange, variant = "d
       <legend className="sr-only">Select a display theme:</legend>
 
       {/* Light Theme */}
-      <span className={getButtonClasses(selectedTheme === "light")}>
+      <span className={getButtonClasses(theme === "light")}>
         <input
           aria-label="light"
-          id="light"
+            id="light"
           className="sr-only"
           type="radio"
           value="light"
           name="theme"
-          checked={selectedTheme === "light"}
+          checked={theme === "light"}
           onChange={() => handleThemeChange("light")}
         />
         <label htmlFor="light" className="cursor-pointer w-full h-full grid place-items-center">
@@ -95,7 +94,7 @@ export function ThemeToggle({ defaultTheme = "dark", onThemeChange, variant = "d
       </span>
 
       {/* Dark Theme */}
-      <span className={getButtonClasses(selectedTheme === "dark")}>
+      <span className={getButtonClasses(theme === "dark")}>
         <input
           aria-label="dark"
           id="dark"
@@ -103,7 +102,7 @@ export function ThemeToggle({ defaultTheme = "dark", onThemeChange, variant = "d
           type="radio"
           value="dark"
           name="theme"
-          checked={selectedTheme === "dark"}
+          checked={theme === "dark"}
           onChange={() => handleThemeChange("dark")}
         />
         <label htmlFor="dark" className="cursor-pointer w-full h-full grid place-items-center">
@@ -118,7 +117,7 @@ export function ThemeToggle({ defaultTheme = "dark", onThemeChange, variant = "d
       </span>
 
       {/* System Theme */}
-      <span className={getButtonClasses(selectedTheme === "system")}>
+      <span className={getButtonClasses(theme === "system")}>
         <input
           aria-label="system"
           id="system"
@@ -126,7 +125,7 @@ export function ThemeToggle({ defaultTheme = "dark", onThemeChange, variant = "d
           type="radio"
           value="system"
           name="theme"
-          checked={selectedTheme === "system"}
+          checked={theme === "system"}
           onChange={() => handleThemeChange("system")}
         />
         <label htmlFor="system" className="cursor-pointer w-full h-full grid place-items-center">
