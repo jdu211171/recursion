@@ -10,6 +10,17 @@
   - Clarified borrowing constraints and blacklist scoping
   - Added data isolation, deactivation, and guest borrower guidance
  - SRS: Simplified identity model wording for clarity (concept-only)
+ - Auth service: Align with Role/Access model
+   - Added env-based SuperAdmin (SUPERADMINS=email1,email2) surfaced as `isSuperAdmin` in JWT/`/me`
+   - New endpoints: `GET /auth/contexts` (list org+instances), `POST /auth/context` (switch instance, new JWT)
+   - `requireRole` now allows SuperAdmin override inside auth service
+   - Staff can create only Borrowers in their instance; Admin cannot create Admins (SuperAdmin only)
+   - Added OrgMembership + InstanceAssignment + UserOrgProfile to Prisma schema; kept legacy User.orgId/instanceId/role for compatibility
+   - JWTs now include `memberships` and `assignments` arrays; `orgId`/`instanceId` remain selected context for compatibility
+   - `register`, `login`, `refresh`, `me`, and `context` endpoints now derive and return contexts from memberships/assignments (with on-the-fly backfill from legacy fields)
+   - Access management APIs: `GET/POST/PATCH/DELETE /access/memberships`, `GET/POST/PATCH/DELETE /access/assignments` with org-admin and staff guardrails
+   - Minimal seed script: `services/auth/prisma/seed-minimal.ts` and `bun run seed:minimal` to create Demo Org, Default instance, and an Admin user
+ - Business Logic: Adjusted auth middleware to accept new JWT shape (string roles, memberships/assignments) and tenant validation
 - Docs: Unified Redocly styles in Business Logic and File Storage to match Auth; removed dark theme overrides and aligned fallback loader.
 - Auth service: Added API docs via Redocly Elements
   - New `services/auth/openapi.yaml` covering core auth endpoints
@@ -23,6 +34,12 @@
    - Uses Redocly Elements with fallback to Redoc if CDN fails
   - Dark mode: Applied dark theme to Business Logic and File Storage docs pages for visual consistency
 > Task Fixes
+- RBAC: Align role checks with SRS
+  - Disallow Admin creating Borrowers; restrict to Staff in own instance
+  - Require `instanceId` when Admin creates Staff; validate org ownership
+  - Auth middleware tenant check respects memberships/assignments arrays
+  - SuperAdmin no longer manages instance assignments (only org Admins)
+  - Removed invalid `User.orgId/instanceId/role` references in users routes
 ~ Bugs and Issues
 ✅ Completed Tasks
 

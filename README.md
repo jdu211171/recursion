@@ -20,7 +20,7 @@ A scalable borrowing and lending platform built with microservices architecture,
                              │
         ┌────────────────────┼────────────────────┐
         │                    │                    │
-   ┌────▼────┐      ┌────────▼────────┐   ┌──────▼───────┐
+   ┌────▼────┐      ┌────────▼────────┐   ┌───────▼──────┐
    │Frontend │      │  Auth Service   │   │Business Logic│
    │ (React) │      │  (Bun/Express)  │   │(Bun/Express) │
    └─────────┘      └────────┬────────┘   └───────┬──────┘
