@@ -5,6 +5,7 @@
 ● Under Review Tasks
 ※ Development Rules and Notes
 ✓ Task Completion Reports
+- Repo hygiene: Added root `.gitignore` to ignore all `node_modules/`; removed tracked `services/frontend/node_modules` from Git index.
 - SRS: Defined multi-tenant user/org model
   - Single global user; per-org `OrgMembership` and per-instance `InstanceAssignment`
   - Clarified borrowing constraints and blacklist scoping
@@ -181,6 +182,13 @@
 - Implemented non-MUI table console (Header, Toolbar, DataTable, Overview) and lite contexts.
 - Added CSV utilities and CsvImportModal; wired toolbar actions for create/import/export with UnifiedForm schemas (Items/Users/Borrowings) and toasts.
 - Flattened DataTable surface styling: removed elevation, applied flat translucent glass panel consistent with theme switcher; added clearer row hover and selection states.
+- Created new React SPA with Vite and bun:
+  - Initialized fresh Vite + React + TypeScript project in services/frontend
+  - Configured vite.config.ts with proxy settings for microservices (auth:3000, business-logic:3001, file-storage:3002)
+  - Enhanced TypeScript configuration with path aliases (@/* for src/*)
+  - Set up global theme variables in index.css (Inter font, colors, spacing, shadows)
+  - Created basic SPA shell with header, toolbar, and content area
+  - Verified successful build and dev server functionality
 
 ✅ Completed Tasks
 - Repository status reviewed; initial plan drafted.
