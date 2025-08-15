@@ -5,10 +5,18 @@
 ● Under Review Tasks
 ※ Development Rules and Notes
 ✓ Task Completion Reports
+- Docs: Unified Redocly styles in Business Logic and File Storage to match Auth; removed dark theme overrides and aligned fallback loader.
 - Auth service: Added API docs via Redocly Elements
   - New `services/auth/openapi.yaml` covering core auth endpoints
   - `/docs` serves interactive docs with Try It; `/openapi.yaml` serves the spec
   - No new dependencies; CDN assets used per project proxy guidance
+ - Business Logic service: Added `/docs` and `/openapi.yaml`
+   - New `services/business-logic/openapi.yaml` with Items, Lending, Reservations, Orgs basics
+   - Relative spec URL ensures Vite proxy compatibility
+ - File Storage service: Added `/docs` and `/openapi.yaml`
+   - New `services/file-storage/openapi.yaml` covering uploads, listing, metadata, download URL
+   - Uses Redocly Elements with fallback to Redoc if CDN fails
+  - Dark mode: Applied dark theme to Business Logic and File Storage docs pages for visual consistency
 > Task Fixes
 ~ Bugs and Issues
 ✅ Completed Tasks

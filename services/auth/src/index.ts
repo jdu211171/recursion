@@ -54,6 +54,7 @@ app.get('/docs', (_req, res) => {
         show-curl-before-try="true"
         layout="stacked"
         try-it="true"
+        theme="dark"
       ></elements-api>
       <div id="fallback" class="fallback">
         <redoc spec-url="./openapi.yaml"></redoc>
