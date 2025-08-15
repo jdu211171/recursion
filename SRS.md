@@ -235,3 +235,16 @@ Stack for each service:
    - Reserve/borrow items from assigned instances
    - View personal borrowing history/penalties
    - No access to admin features or other borrowers' data
+
+### User and Access Model (Conceptual)
+- One account per person across the whole system; we never recreate the same person per organization or instance.
+- Access is granted by membership, not by duplicating users:
+  - Organization membership gives a person access to that organization (with roles like Admin/Staff/Borrower as defined by policy).
+  - Instance assignment gives a person access within a specific instance of that organization.
+- Borrowing rules (simple):
+  - People can borrow only in instances where they are assigned as borrowers.
+  - Staff manage items and lending only in instances where they are assigned (organization admins can manage all instances in their org).
+- Blacklists and penalties apply within an organization and may be limited to a single instance if needed.
+- Organization‑specific profile details (e.g., local IDs, phone) can be stored per organization without changing the global account.
+- Removing someone from an organization revokes their access there but does not affect their access in other organizations.
+- Optional: allow temporary “guest borrowers” for one‑off cases, with a path to convert them into full accounts later.

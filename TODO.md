@@ -5,6 +5,11 @@
 ● Under Review Tasks
 ※ Development Rules and Notes
 ✓ Task Completion Reports
+- SRS: Defined multi-tenant user/org model
+  - Single global user; per-org `OrgMembership` and per-instance `InstanceAssignment`
+  - Clarified borrowing constraints and blacklist scoping
+  - Added data isolation, deactivation, and guest borrower guidance
+ - SRS: Simplified identity model wording for clarity (concept-only)
 - Docs: Unified Redocly styles in Business Logic and File Storage to match Auth; removed dark theme overrides and aligned fallback loader.
 - Auth service: Added API docs via Redocly Elements
   - New `services/auth/openapi.yaml` covering core auth endpoints
