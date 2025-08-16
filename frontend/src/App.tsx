@@ -3,7 +3,8 @@ import { ThemeToggle } from "./components/ui/theme-toggle"
 import { DataTable } from "./components/data-table"
 import { Toaster } from "sonner"
 import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react"
-import { TeamSwitcher } from "./components/team-switcher"
+import { HeaderTeamSwitcher } from "./components/header-team-switcher"
+import { HeaderNavUser } from "./components/header-nav-user"
 
 function App() {
   const data = [
@@ -642,14 +643,18 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <div className="min-h-screen w-full">
-        <div className="fixed top-4 right-4 z-50">
-          <TeamSwitcher teams={teams} />
-          <ThemeToggle />
-        </div>
-        <div className="container mx-auto py-10">
-          <h1 className="text-3xl font-bold mb-8">Document Sections</h1>
+        <header className="w-full border-b">
+          <div className="container mx-auto py-2 flex items-center justify-between">
+            <HeaderTeamSwitcher teams={teams} />
+            <div className="flex items-center gap-2">
+              <HeaderNavUser user={{ name: "Jane Doe", email: "jane@example.com", avatar: "https://avatar.vercel.sh/jane" }} />
+              <ThemeToggle />
+            </div>
+          </div>
+        </header>
+        <main className="container mx-auto py-10">
           <DataTable data={data} />
-        </div>
+        </main>
       </div>
       <Toaster position="bottom-right" />
     </ThemeProvider>
