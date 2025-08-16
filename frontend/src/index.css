@@ -108,7 +108,7 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
 }
- 
+
 .light {
   /* Explicit light theme overrides (mirrors the base :root light design) */
   --background: oklch(1 0 0);
@@ -143,7 +143,7 @@
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
 }
- 
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

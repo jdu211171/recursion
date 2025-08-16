@@ -2,6 +2,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { ThemeToggle } from "./components/ui/theme-toggle"
 import { DataTable } from "./components/data-table"
 import { Toaster } from "sonner"
+import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react"
+import { TeamSwitcher } from "./components/team-switcher"
 
 function App() {
   const data = [
@@ -618,11 +620,30 @@ function App() {
       "reviewer": "Assign reviewer"
     }
   ]
+  const teams =
+      [
+        {
+          name: "Acme Inc",
+          logo: GalleryVerticalEnd,
+          plan: "Enterprise",
+        },
+        {
+          name: "Acme Corp.",
+          logo: AudioWaveform,
+          plan: "Startup",
+        },
+        {
+          name: "Evil Corp.",
+          logo: Command,
+          plan: "Free",
+        },
+      ]
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <div className="min-h-screen w-full">
         <div className="fixed top-4 right-4 z-50">
+          <TeamSwitcher teams={teams} />
           <ThemeToggle />
         </div>
         <div className="container mx-auto py-10">
