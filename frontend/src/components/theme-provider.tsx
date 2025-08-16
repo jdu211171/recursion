@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { ThemeProviderContext } from "@/contexts/theme-context"
 import type { Theme } from "@/contexts/theme-context"
 
@@ -18,29 +18,50 @@ export function ThemeProvider({
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   )
 
+  // Track first render to avoid animating the initial paint
+  const isFirstRender = useRef(true)
+
+  // Inject a lightweight global transition style (only once)
   useEffect(() => {
-    const root = window.document.documentElement
-
-    root.classList.remove("light", "dark")
-
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light"
-
-      root.classList.add(systemTheme)
-      return
+    const STYLE_ID = "theme-transition-styles"
+    if (!document.getElementById(STYLE_ID)) {
+      const style = document.createElement("style")
+      style.id = STYLE_ID
+      style.textContent = `
+:root.theme-transition, 
+:root.theme-transition * {
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease, fill .3s ease, stroke .3s ease;
+}`
+      document.head.appendChild(style)
     }
+  }, [])
 
-    root.classList.add(theme)
+  useEffect(() => {
+    const root = document.documentElement
+
+    // Resolve "system" to an explicit theme first (no intermediate class removal)
+    const resolvedTheme: Theme =
+      theme === "system"
+        ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        : theme
+
+    // Toggle only the necessary class instead of removing both first
+    root.classList.toggle("dark", resolvedTheme === "dark")
+    root.classList.toggle("light", resolvedTheme === "light")
+
+    // After the first paint, enable smooth transitions for subsequent switches
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+    } else {
+      root.classList.add("theme-transition")
+    }
   }, [theme])
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
+    setTheme: (next: Theme) => {
+      localStorage.setItem(storageKey, next)
+      setTheme(next)
     },
   }
 
