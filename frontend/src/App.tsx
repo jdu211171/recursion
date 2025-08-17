@@ -1,12 +1,30 @@
 import { ThemeProvider } from "@/components/theme-provider"
+import { useEffect, useState } from "react"
 import { ThemeToggle } from "./components/ui/theme-toggle"
 import { DataTable } from "./components/data-table"
 import { Toaster } from "sonner"
 import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react"
 import { HeaderTeamSwitcher } from "./components/header-team-switcher"
 import { HeaderNavUser } from "./components/header-nav-user"
+import { LoginForm } from "./components/login-form"
 
 function App() {
+  const [isAuthed, setIsAuthed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("authed") === "1"
+    } catch {
+      return false
+    }
+  })
+
+  useEffect(() => {
+    try {
+      if (isAuthed) localStorage.setItem("authed", "1")
+      else localStorage.removeItem("authed")
+    } catch {
+      // ignore storage errors
+    }
+  }, [isAuthed])
   const data = [
     {
       "id": 1,
@@ -642,20 +660,31 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <div className="min-h-screen w-full">
-        <header className="w-full border-b">
-          <div className="container mx-auto py-2 flex items-center justify-between">
-            <HeaderTeamSwitcher teams={teams} />
-            <div className="flex items-center gap-2">
-              <HeaderNavUser user={{ name: "Jane Doe", email: "jane@example.com", avatar: "https://avatar.vercel.sh/jane" }} />
-              <ThemeToggle />
+      {isAuthed ? (
+        <div className="min-h-screen w-full">
+          <header className="w-full border-b">
+            <div className="container mx-auto py-2 flex items-center justify-between">
+              <HeaderTeamSwitcher teams={teams} />
+              <div className="flex items-center gap-2">
+                <HeaderNavUser
+                  user={{ name: "Jane Doe", email: "jane@example.com", avatar: "https://avatar.vercel.sh/jane" }}
+                  onLogout={() => setIsAuthed(false)}
+                />
+                <ThemeToggle />
+              </div>
             </div>
+          </header>
+          <main className="container mx-auto py-10">
+            <DataTable data={data} />
+          </main>
+        </div>
+      ) : (
+        <div className="min-h-screen w-full flex items-center justify-center py-10">
+          <div className="mx-auto w-full max-w-sm p-6">
+            <LoginForm />
           </div>
-        </header>
-        <main className="container mx-auto py-10">
-          <DataTable data={data} />
-        </main>
-      </div>
+        </div>
+      )}
       <Toaster position="bottom-right" />
     </ThemeProvider>
   )
