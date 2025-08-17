@@ -10,13 +10,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-const testUsers = ["john@example.com", "jane@example.com", "admin@acme.com", "user@test.com"]
+const testUsers = ["john@example.com", "jane@example.com", "admin@acme.com", "user@test.com"]; const DEFAULT_TEST_PASSWORD = "test1234"
 
-export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+interface LoginFormProps extends React.ComponentProps<"div"> {
+  onAuthenticated?: () => void
+}
+
+export function LoginForm({ className, onAuthenticated, ...props }: LoginFormProps) {
   const [step, setStep] = useState<"email" | "password">("email")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [isValidEmail, setIsValidEmail] = useState(false)
+  const [isValidEmail, setIsValidEmail] = useState(false); const [error, setError] = useState<string | null>(null)
 
   const validateEmail = (emailValue: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -30,19 +34,27 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (isValidEmail && userExists(email)) {
+      setError(null)
       setStep("password")
     }
   }
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Login attempt:", { email, password })
-    // Add actual authentication logic here
+    if (password === DEFAULT_TEST_PASSWORD) {
+      console.log("Auth success:", { email })
+      setError(null)
+      onAuthenticated?.()
+    } else {
+      setError(`Invalid password. Use test password: ${DEFAULT_TEST_PASSWORD}`)
+    }
+    // Demo-only password check above
   }
 
   const handleBack = () => {
     setStep("email")
     setPassword("")
+    setError(null)
   }
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,11 +137,15 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   type="password"
                   placeholder="Password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    if (error) setError(null)
+                  }}
                   required
                   autoFocus
                   className="transition-all duration-300 ease-out"
                 />
+                {error && <p className="text-xs text-destructive">{error}</p>}
               </div>
             </div>
 

@@ -681,7 +681,7 @@ function App() {
       ) : (
         <div className="min-h-screen w-full flex items-center justify-center py-10">
           <div className="mx-auto w-full max-w-sm p-6">
-            <LoginForm />
+            <LoginForm onAuthenticated={() => setIsAuthed(true)} />
           </div>
         </div>
       )}
