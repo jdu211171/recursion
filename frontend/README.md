@@ -27,9 +27,9 @@ in the loans table (this supposed to show borrowed items with their respective b
 * **Borrower additional fields** by default off.
 * **Renewal Count** – Number of successful renewals applied.
 * **Max Renewals** – Policy cap (useful for spotting near‑limit loans).
-* **Returned At** – Timestampz of completed return “—” if not yet returned.
-* **Days Overdue** – Integer or “—” if not overdue (separate from relative string if precision needed).
-* **Overdue Fee Accrued** – Computed monetary amount or “—” if not
+* **Returned At** – Timestampz of completed return "—" if not yet returned.
+* **Days Overdue** – Integer or "—" if not overdue (separate from relative string if precision needed).
+* **Overdue Fee Accrued** – Computed monetary amount or "—" if not
 * **Condition Out** – Assessed condition at checkout (blank until set).
 * **Condition In** – Assessed condition at return (blank until set).
 * **Last Action By** – Staff user who performed the most recent state change.
@@ -37,30 +37,60 @@ in the loans table (this supposed to show borrowed items with their respective b
 * **Created At** – System creation Timestampz (rarely needed; mostly auditing).
 * **Updated At** – Last modification Timestampz (auditing / troubleshooting).
 
-### 6. Sorting & Filtering Recommendations
+### 3. Sorting & Filtering Recommendations
 Support multi‑column sort (primary: Due Date ascending, secondary: Borrower). Provide quick filters:
 * Status chips (Active, Overdue, Returned (session), Lost/Damaged).
 * Date range (Checked Out, Due Date).
 * Item category
 
-### 7. Export Considerations
+### 4. Export Considerations
 CSV / PDF exports include:
 * All currently visible columns by default.
 * Option to “Include all columns” (even hidden) if role permits.
 * Timestampzs exported in ISO 8601 UTC (with user-local formatting only in UI).
 * Monetary fields include currency code if multi‑currency potential.
 
+### 5. Return modal with confirmation
+
+### 6. Blacklist Modal
+The blacklist modal provides:
+* A duration selector: 1 week, 1 month, 3 months, 6 months, 1 year, or Permanent.
+* A reason selector: Lost item, Damaged item, Overdue item, or Other (selecting Other reveals a text input for a custom reason).
+
+Additional options:
+* Permanent blacklist + A reason selector
+* Payment required (input shows up for payment amount) + A reason selector
+
 ---
 
 ## Items Table Columns
 
 ### 1. Default Visible Columns (core workflow)
-* **Name** - Item name.
-* **Available/Total** - Count of available items vs total in collection.
-* **Category** - Item category (e.g. Book, Tool, Equipment) “—” if not set.
-* **Attachment** - Link to item attachment (e.g. image, document).
-* **Notes** - Staff notes.
-* **Actions** - Contextual buttons (View (includes Edit), Delete).
+* **Name** – Primary display name / title.
+* **Category** – Classification (Book, Tool, Equipment, etc.) — if unset show "—".
+* **Available / Total** – Inventory availability (derived: totalQuantity - activeLoans). Format "7 / 12".
+* **Status** – Aggregate status (Available, Unavailable, All Loaned, Retired, Maintenance, Reserved) color coded.
+* **Attachments** – Indicator (icon + count) if there are files/images; click opens gallery/panel.
+* **Actions** – View (includes Edit), Quick Loan (if role & stock > 0), Retire, Delete (guarded).
+
+### 2. Common Optional Columns (toggle)
+* **Custom Fields** – Dynamic fields about the item (key/value pairs).
+* **Condition** – Current baseline condition (New, Good, Fair, Poor, Damaged) - if unset show "—".
+* **Notes** – Staff notes.
+* **Created At**
+* **Updated At**
+
+### 3. Export (CSV/PDF) + Import CSV (create or update)
+* Includes currently visible columns (option: include all), and be able to export all items or filtered subset.
+
+### 4. Create Form + Edit Form
+* **Name** – Required, unique within Org.
+* **Category** – Optional, be able to select from predefined list or create new at the spot.
+* **Total Quantity** – Required, positive integer.
+* **Condition** – Optional, select from predefined list (New, Good, Fair, Poor, Damaged).
+* **Attachments** – Optional, upload file/image.
+* **Custom Fields** – Optional, key/value pairs (dynamic).
+* **Notes** – Optional, text area for staff notes.
 
 # User Settings
 ### By Default
