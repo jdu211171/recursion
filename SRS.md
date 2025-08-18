@@ -1,250 +1,432 @@
-# Requirements Definition
+# Software Requirements Specification (SRS)
 
-- Priority #1: Design the system as multi-tenant to support multiple organizations, allowing independent data isolation, configurations, and usage across different entities (e.g., separate inventories, users, and rules per organization). Within each organization, support multiple instances (e.g., sub-tenants for managing specific categories like books, sports items, or tools in a school setting), enabling granular management while maintaining hierarchical relationships and isolation. The core borrowing/lending logic must be generalized for any item type (e.g., books, tools, equipment), not limited to books, enabling broad applicability in various scenarios.
+**Flexible, SaaS-Ready Multi-Tenant Lending Platform (Full Version)**
 
-- The project must follow DevOps and Agile workflows: introduce new features, run tests, and deploy to the server automatically once all tests pass.
+---
 
-- Keep the implementation as simple as possible:
-  - Backend code should be clear and concise so junior developers can pick it up instantly.
-  - Frontend UI must be intuitive for any user, without unnecessary design complexity.
+## 1) Introduction
 
-- Architect the app as microservices:
-  - Frontend deployed independently
-  - Authentication service hosted separately
-  - Database hosted on its own service
-  - Controller/business logic in distinct service(s)
+### 1.1 Purpose
 
-- Focus on managing deep, multi-layer relational data for full CRUD, lending, and returning operations.
-  **The design must support any borrowing/lending scenario (e.g., books in libraries, tools in workshops, equipment in organizations), using the library example only as an optional illustration if needed.**
+Define a clear, non-technical specification for a multi-tenant platform that manages borrowing and lending of any item type (books, tools, equipment). The system must be configurable per organization, extensible for future requests, and suitable for operating as a SaaS.
 
-**Use cases & User stories:**
-- **As a staff/admin, I want to categorize items optionally so that I can organize the inventory by themes or types for easier searching across tenants.**
-- **As a staff, I want to *track item quantities (total/available counts) for new items* so that assets are manageable at an aggregate level while supporting borrowing.**
-- **As a user/borrower, I want to borrow an item for a specified period so that I can use it temporarily and return it on time.**
-- **As a staff, I want to record user information (e.g., name, ID, contact) during lending so that I can identify and contact them later if needed.**
-- **As a user/borrower, I want to reserve an item in advance so that it's held for me when available.**
-- **As a staff/admin, I want to apply penalties for lost items so that users pay a specified amount to cover replacement costs.**
-- **As a system, I want to automatically blacklist users who return items late, with temporary lending disables that increase dynamically based on lateness severity, so that repeat offenders are discouraged.**
-- **As a staff/admin, I want to edit or override punishments (e.g., blacklist duration or penalties) so that I can handle special cases flexibly.**
-- **As a staff, I want to attach files (e.g., PDF versions or documentation) to item records so that digital assets are stored and accessible within the system.**
+### 1.2 Audience
 
-Functional requirements:
-- Support hierarchical multi-tenancy with isolated data per organization (top-level tenant) and per instance within organizations (sub-tenants for specific item management, e.g., books vs. sports items in a school), including tenant-specific configurations for items, users, and rules.
-- Enable generalized CRUD operations for items/assets, including *quantity tracking (total/available counts)*, category assignment, *simplified for aggregate management*, adaptable to any borrowing scenario.
-- Implement lending and returning workflows, including due dates, user identification, and status tracking, across tenants and sub-instances *using count decrements/increments*.
-- Provide item reservation system with availability checks and holds, tenant-aware and scoped to instances *based on available counts*.
-- Manage user penalties for lost or late returns, including financial amounts and blacklist enforcement, customizable per tenant/instance.
-- Provide role-based editing for punishments (librarian/admin only), with tenant scoping.
-- Integrate file storage for attaching documents (e.g., PDFs or manuals) to item entries, secured per tenant/instance.
+Product owners, project managers, designers, domain experts, and developers who need a plain-language description of behavior, policies, and boundaries—without infrastructure or tooling details.
 
-Non-functional requirements:
-- The system must handle relational data efficiently (e.g., items to categories, *borrowings to item counts*, users to borrowings) to ensure scalability for hierarchical multi-tenant environments (organizations and instances) and diverse borrowing/lending scenarios.
-- Blacklist and penalty logic should be dynamic, configurable per tenant/instance, with security to prevent unauthorized edits or cross-tenant access.
-- File storage should be secure, with limits on file sizes/types to maintain performance and prevent abuse, and isolated by tenant/instance.
-- UI/UX should remain simple and intuitive, with clear notifications for reservations, due dates, and penalties, while supporting multi-tenant navigation (e.g., switching organizations or instances if authorized) *and in-place actions like category creation or count updates*.
+### 1.3 Goals
 
-**Technical requirements:**
-- **Use containerization (e.g., Docker) for all microservices to ensure independent deployment, portability, and scalability in hierarchical multi-tenant environments.**
-- **Implement API communication via RESTful endpoints or gRPC for efficiency, with JSON for data exchange to keep integrations simple.**
-- **Incorporate logging and monitoring (e.g., ELK stack or Prometheus/Grafana) to track system health, errors, and performance metrics across services.**
-- **Support file storage using cloud-agnostic solutions (e.g., S3-compatible storage) with secure access controls and tenant/instance isolation.**
-- **Ensure database schema supports hierarchical multi-tenancy (e.g., via organization IDs and instance IDs in tables or schema-per-tenant) for data isolation and query efficiency.**
-- **Follow coding standards: Use TypeScript for type safety, linting (e.g., ESLint), and testing frameworks (e.g., Jest) to maintain code clarity for junior developers.**
-- **Handle errors gracefully with standardized responses and retries for resilience in distributed microservices.**
+* Hierarchical multi-tenancy with strong data isolation.
+* One **global account** per person across the entire SaaS.
+* Generalized circulation for any item type.
+* Tenant-configurable identity and policy rules.
+* Simple, intuitive UI for everyday tasks.
+* Extensible foundation to accept new/changed features from future customers.
 
-Acceptance criteria (with Security Considerations):
-- Multi-tenancy hierarchy is enforced: Data for one organization/instance cannot be accessed by another; tested via isolated CRUD operations across simulated tenants (e.g., School Org with Books Instance and Sports Instance). Security: Use tenant/instance IDs in all queries to prevent cross-access; audit logs capture unauthorized attempts.
-- CRUD for items works seamlessly: *Counts auto-managed*, categories optional, *aggregate quantities handled*; verified with at least 3 item types (e.g., book, tool, equipment). Security: Role-based access (admins only for creates/edits); input validation to prevent SQL injection.
-- Lending/returning flows: Due dates enforced, user info recorded, status updates in real-time; tested with overdue scenarios triggering blacklists/penalties *via count adjustments*. Security: Encrypt user contact data; ensure blacklists are tenant-scoped to avoid global leaks.
-- Reservations: Availability checks accurate, holds expire if not claimed; multi-user conflict tests pass *using count reductions*. Security: Prevent reservation spoofing via auth tokens.
-- Penalties and overrides: Auto-blacklist scales with lateness (e.g., 1 day = 3-day ban, configurable); admins can edit via UI. Security: Admin-only endpoints with RBAC; log all overrides for auditing.
-- File attachments: Uploads succeed for PDFs/manuals (<25MB), accessible only within tenant/instance. Security: Access controlled by roles.
-- System-wide: UI intuitive (e.g., dropdowns for org/instance switching, *in-place edits*), performance under load (100 concurrent users), errors handled gracefully. Security: HTTPS everywhere, JWT validation, rate limiting to prevent DDoS.
+### 1.4 Non-Goals
 
-Project Scope:
-- In Scope: Hierarchical multi-tenancy (organizations and instances), generalized borrowing/lending for any items, microservices architecture, basic CRUD/reservation/penalty features, file storage, RBAC auth, Agile/DevOps workflows, relational data management *simplified with counts*.
-- Out of Scope: Advanced analytics (e.g., reporting dashboards), payment integrations for penalties, mobile apps, AI-driven recommendations, non-essential integrations (e.g., email notifications beyond basics). Focus on core MVP for scalability; future sprints can add enhancements.
-- Assumptions: Users have basic tech literacy; cloud infrastructure available for deployment. Risks: Data migration for existing tenants—mitigate with schema versioning.
+* Prescribing specific infrastructure, deployment tools, or technology brands.
+* Advanced analytics, payments, or complex third-party integrations (MVP excludes these).
 
-Software Requirement Specification (SRS):
-1. Introduction: Purpose is a scalable, multi-tenant borrowing/lending system for organizations with sub-instances, generalized for any items.
-2. Overall Description: Microservices-based, user roles (admin, staff, borrower), supports use cases above.
-3. Specific Requirements: As detailed in Functional/Non-Functional sections; interfaces via REST APIs, data via JSON.
-4. Supporting Information: Standards (TypeScript, Docker), constraints (no internet-dependent features in core logic).
+---
 
-Project type (Monolithic, Microservice):
-- Microservice
+## 2) System Overview
 
-Stack for each service:
-- Frontend: React with TypeScript (for intuitive UI), deployed via Docker; use Material-UI for simple components.
-- Authentication Service: Node.js with Express/TypeScript, JWT for tokens, hosted in Docker; integrates with database for user roles.
-- Database Service: PostgreSQL (relational for deep links), with Docker; schema includes tenant/org/instance IDs for isolation.
-- Business Logic Service: Node.js with Express/TypeScript, handling CRUD/lending/reservations/penalties; Dockerized, communicates via REST.
-- File Storage: MinIO (S3-compatible, self-hosted in Docker) for cloud-agnostic, secure uploads with tenant buckets.
+### 2.1 Multi-Tenancy Model
 
-**Infrastructure Architecture**:
-- **Core Overview**: Microservices with Docker for independent deployment and multi-tenancy isolation. Services communicate via REST APIs (JSON); use Nginx as API gateway for routing/security.
-  - Diagram:
-    ```
-    [User] --> [API Gateway (Nginx)] --> [Frontend (React Static)]
-                         |
-                         +--> [Auth Service (Node.js)] <--> [Database (PostgreSQL)]
-                         |
-                         +--> [Business Logic (Node.js)] <--> [Database] <--> [File Storage (MinIO)]
-    ```
-    - **Database Setup**: PostgreSQL with org_id/instance_id in tables; row-level security for isolation. Use Prisma ORM for queries.
-    - **Backend/Frontend Services**: Node.js/Express/TypeScript for auth (JWT with scopes) and business logic (CRUD/lending). Static React frontend. MinIO buckets per tenant (<25MB file limit).
-    - **Deployment**: Docker Compose for local/dev; prepare Kubernetes for prod. CI/CD via GitHub Actions for auto-build/test/deploy. HTTPS/RBAC for security.
+* **Organization (Org)**: top-level tenant (e.g., a school or company).
+* **Instance**: sub-tenant within an Org (e.g., Library vs Workshop). Instances inherit defaults from the Org but can override selected policies.
+* All data access is scoped by Org and, where relevant, Instance.
 
-    Development method (Agile, Waterfall, Hybrid):
-    - Agile
+### 2.2 Global User Account Model
 
-    CI/CD pipeline design:
-    - Not decided yet
+* Each person has exactly **one global Account** created once for the entire SaaS.
+* Access to Org/Instance data is granted through **Memberships** that link the global Account to an Org and optionally to Instances, with a role.
+* Org-specific details (e.g., local phone, local display name) are stored in an **Org Profile** attached to the same global Account.
 
-    Authentication flow, Authorization and Role management:
-    - Flow: User logs in via Auth Service (username/password or OAuth), receives JWT with roles (e.g., admin, staff, borrower) and tenant/instance scopes. All API calls validate JWT, check scopes against requested org/instance.
-    - Authorization: RBAC via middleware—e.g., admins edit penalties across their org/instances; staff handle lending within instances; borrowers view/reserve only. Use libraries like express-jwt for simplicity.
+### 2.3 Extensibility
 
-    # Microservices Definition
+* Policies, rules, and small customizations are configuration-driven.
+* Safe **extension points** allow adding fields and light custom behavior per tenant without affecting other tenants.
+* Feature flags allow enabling tenant-specific capabilities.
 
-    ### Clear Objectives and Scope for Each Microservice
-    - **Objectives**: Each microservice aims to handle a specific domain (e.g., authentication, business logic) with clear boundaries to promote loose coupling, independent scaling, and fault isolation. They support multi-tenancy through tenant/instance IDs in data models and API scopes, enabling data isolation and configurable rules per organization/instance.
-    - **Scope**: Limited to MVP features—hierarchical CRUD, lending workflows, reservations, penalties/blacklists, file storage, and RBAC. Out of scope: Advanced features like analytics, payments, or external integrations. Each service focuses on its responsibilities, with inter-service communication via standardized APIs for resilience.
+### 2.4 High-Level Capabilities
 
-    ### Identified Microservices
-    To keep the architecture simple and maintainable for junior developers, we'll use the following minimal set of microservices, building on the initial stack:
-    1. **Frontend Service** (Client-side UI, deployed as a static app).
-    2. **Authentication Service** (Handles user auth and role management).
-    3. **Business Logic Service** (Core application logic for CRUD, lending, etc.).
-    4. **File Storage Service** (Secure storage for attachments).
+* Item catalog with optional categories and quantity tracking (total/available).
+* Borrowing, returning, reservations, and handling lost items.
+* Penalties and blacklist rules that each Org can configure.
+* Attachments (manuals, PDFs) linked to items.
+* Comprehensive audit of important actions and policy changes.
 
-    Note: The Database (PostgreSQL) is treated as a dedicated infrastructure service rather than a traditional microservice, hosted separately for isolation but shared across services with row-level security for multi-tenancy. This avoids over-fragmentation while ensuring scalability.
+---
 
-    ## Detailed Microservice Breakdown
+## 3) Glossary
 
-    ### Frontend Service
-    - **Purpose**: Provides an intuitive user interface for all interactions, including multi-tenant navigation (e.g., org/instance switching), item management, lending/reservations, and penalty overrides, ensuring simplicity for borrowers, staff, and admins.
-    - **Recommended Technology Stack**: React with TypeScript for type safety and maintainability; Material-UI, ShadCn or custom components for simple, responsive components; Docker for containerized deployment; Nginx for serving static files.
-    - **Core Responsibilities**:
-    - Render UI components for CRUD operations, lending/returning flows, reservations, and file uploads/views.
-    - Handle client-side state management (e.g., via Redux) for tenant-specific views.
-    - Integrate with backend APIs via REST calls, displaying notifications for due dates, penalties, and errors.
-    - Support role-based UI elements (e.g., hide admin features for borrowers).
-    - **Applicable Best Practices**:
-    - Keep UI intuitive and minimal: Use clear labels, dropdowns for tenant switching, and avoid complex animations to ensure accessibility.
-    - Foster open communication: Include feedback mechanisms (e.g., tooltips) and regular UI testing in Agile sprints.
-    - Avoid micromanagement: Delegate API calls to hooks/utilities for clean code.
-    - Engage in ongoing planning: Use component libraries for rapid iteration and A/B testing for UX refinements.
+* **Account (User)**: A person’s single, global identity in the SaaS.
+* **Org**: Top-level tenant.
+* **Instance**: Sub-tenant within an Org (e.g., specific collection).
+* **Membership**: Link from an Account to an Org and optionally Instances, with a Role.
+* **Org Profile**: Per-Org details for a global Account.
+* **Local Identifier (Alias)**: Org-scoped login handle mapped to the same global Account.
+* **External ID**: Org-issued identifier (optional).
+* **Item**: Any asset managed by counts (`total` and `available`).
+* **Loan**: A checkout with a due date.
+* **Reservation**: A time-boxed hold on availability.
+* **Penalty**: Monetary or administrative action (e.g., fees).
+* **Blacklist**: Temporary borrowing ban, often scaled by lateness.
+* **Roles**: SuperAdmin, Admin, Staff, Borrower.
 
-    ### Authentication Service
-    - **Purpose**: Manages secure user authentication, authorization, and role-based access control (RBAC) across tenants, ensuring data isolation and preventing cross-tenant access.
-    - **Recommended Technology Stack**: Node.js with Express and TypeScript for simplicity; JWT for token management; Docker for deployment; Integrate with PostgreSQL for user/role storage.
-    - **Core Responsibilities**:
-    - Handle login/signup flows (username/password or OAuth), issuing JWTs with roles (admin, staff, borrower) and tenant/instance scopes.
-    - Validate tokens for all API requests, enforcing RBAC (e.g., admins can override penalties within their org).
-    - Manage user blacklists dynamically based on penalties from the Business Logic Service.
-    - Provide endpoints for role updates and tenant switching (if authorized).
-    - **Applicable Best Practices**:
-    - Implement proactive risk management: Use secure hashing (e.g., bcrypt) and rate limiting to mitigate brute-force attacks.
-    - Track progress and KPIs: Log auth attempts and monitor failed logins for security alerts.
-    - Ensure quality assurance: Unit test token validation and integration test with other services.
-    - Define roles clearly: Use a RACI matrix for auth-related tasks (e.g., who manages user roles).
+---
 
-    ### Business Logic Service
-    - **Purpose**: Encapsulates the core domain logic for borrowing/lending operations, ensuring generalized handling for any item type across multi-tenant hierarchies.
-    - **Recommended Technology Stack**: Node.js with Express and TypeScript for concise code; Prisma ORM for database interactions; Docker for deployment; Jest for testing.
-    - **Core Responsibilities**:
-    - Perform CRUD on items (*with quantity counts*), scoped to tenants/instances.
-    - Manage lending/returning workflows: Record user info, set due dates, track status, and trigger penalties/blacklists *via count updates*.
-    - Handle reservations: Check availability, place holds, and resolve conflicts *based on available counts*.
-    - Apply/enforce penalties: Calculate fines/blacklists dynamically (configurable per tenant) and allow admin overrides.
-    - Integrate with File Storage for attachment metadata.
-    - **Applicable Best Practices**:
-    - Manage changes formally: Use versioned APIs and change logs to handle schema updates without breaking tenants.
-    - Engage in ongoing adaptation: Implement event-driven triggers (e.g., for overdue notifications) with flexibility for config changes.
-    - Track variances: Use metrics like borrowing throughput and error rates for monitoring.
-    - Keep simple: Clear, modular code with comments for junior devs; avoid deep nesting.
+## 4) Stakeholders & Roles
 
-    ### File Storage Service
-    - **Purpose**: Provides secure, isolated storage for item attachments (e.g., PDFs, manuals), ensuring tenant-specific access and performance limits.
-    - **Recommended Technology Stack**: MinIO (S3-compatible) for self-hosted, cloud-agnostic storage; Docker for deployment; Integrate via SDKs in Node.js services.
-    - **Core Responsibilities**:
-    - Handle file uploads/downloads with size/type limits (<25MB, PDFs/images).
-    - Create tenant/instance-specific buckets for data isolation.
-    - Generate presigned URLs for secure access, integrated with RBAC from Auth Service.
-    - Manage file metadata (e.g., linked to item IDs) stored in the database.
-    - **Applicable Best Practices**:
-    - Proactive risk management: Encrypt files at rest and enforce access controls to prevent leaks.
-    - Ensure quality control: Validate file integrity on upload and monitor storage usage.
-    - Track progress: Log upload failures and set alerts for quota exceedances.
-    - Avoid complexity: Use standard S3 APIs for easy integration and migration.
+* **SuperAdmin (SaaS operator)**: Manages Orgs, assigns Admins, views system health. No access to tenant data content.
+* **Admin (Org)**: Sets policies, manages Instances and memberships, views all data within their Org. An Org Admin implicitly has all Staff capabilities across all Instances in their Org (borrow/return, reservations, manage items, apply/override penalties) in addition to admin functions.
+* **Staff (Instance)**: Manages items, borrowers, loans, returns, reservations; can apply and override penalties/blacklists within assigned Instances.
+* **Borrower**: Searches, reserves, and borrows items in assigned Instances; views personal history and penalties.
 
-    ## Microservice Communication Patterns and Overall Architecture
-    - **Communication Patterns**:
-    - **Synchronous**: Use RESTful APIs with JSON payloads for direct interactions (e.g., Frontend calls Auth for login, then Business Logic for CRUD). Employ gRPC for high-performance needs if latency becomes an issue (start with REST for simplicity).
-    - **Asynchronous**: Introduce message queues (e.g., RabbitMQ) for non-critical tasks like penalty notifications or blacklist updates to decouple services and improve resilience.
-    - **API Gateway**: Nginx as a central entry point for routing requests, load balancing, and adding security (e.g., HTTPS termination, rate limiting).
-    - **Service Discovery**: Use Docker Compose environment variables for dev; Consul or Kubernetes service mesh for prod to handle dynamic scaling.
-    - **Error Handling**: Standardized responses (e.g., {error: "message", code: 400}) with retries/circuit breakers (e.g., via libraries like Axios) for fault tolerance.
+---
 
-    - **Overall Architecture**:
-    - **Diagram** (Text-based for documentation):
-    ```
-    [User] --> [API Gateway (Nginx)] --> [Frontend Service (React)]
-                         |
-                         +--> [Authentication Service (Node.js)] <--> [Database (PostgreSQL)]
-                         |
-                         +--> [Business Logic Service (Node.js)] <--> [Database] <--> [File Storage Service (MinIO)]
-    ```
-    - **Key Principles**: Loose coupling via APIs; database shared with row-level security (org_id/instance_id filters); all services Dockerized for independent deployment. Monitoring via Prometheus/Grafana for cross-service health. Supports Agile by allowing per-service updates without full system downtime.
+## 5) Assumptions & Dependencies
 
-    ## Microservice Management Best Practices as Project Rules/Guidelines
-    - **Rule 1: Define Clear Boundaries and Ownership** – Assign each microservice to a small team or developer for accountability; use domain-driven design to avoid overlap (e.g., Auth owns roles, Business Logic owns workflows).
-    - **Rule 2: Prioritize Independent Deployability** – Each service must build, test, and deploy via CI/CD (e.g., GitHub Actions) without affecting others; version APIs semantically to manage changes.
-    - **Rule 3: Implement Monitoring and Logging** – Use centralized tools (e.g., ELK stack) for logs/errors; track KPIs like response times and error rates per service to enable proactive issue resolution.
-    - **Rule 4: Enforce Security and Isolation** – Apply RBAC/JWT consistently; use tenant IDs in all operations; conduct regular security audits and penetration testing.
-    - **Rule 5: Keep Services Simple and Scalable** – Limit each service to one primary responsibility; scale horizontally with containers/Kubernetes; conduct load testing for multi-tenant loads.
-    - **Rule 6: Foster Collaboration and Retrospectives** – Hold cross-team reviews in Agile sprints; document APIs (e.g., via Swagger) for easy onboarding; learn from deployments by analyzing post-mortems.
-    - **Rule 7: Manage Data Consistency** – Use eventual consistency for async ops; transactions within services for critical flows (e.g., lending + penalty calc); backup databases regularly with tenant isolation in mind.
+* Users have basic digital literacy.
+* Orgs can define and maintain their own policies.
+* The platform provides secure sessions, consistent role checks, and tamper-evident audit history.
+* File uploads are limited in size and type for reliable performance.
 
+---
 
-### Role Definitions & Permissions
-1. **SuperAdmin (System Administrator)**
-   - Create/delete organizations
-   - Assign/unassign **Admins** to organizations
-   - View system-wide metrics (no access to organization-specific data)
-   - Cannot interact with instances/items/borrowers directly
+## 6) Functional Requirements
 
-2. **Admin (Organization Administrator)**
-   - Create/delete instances within their organization
-   - Assign **Staff** to specific instances
-   - Set organization-wide policies (penalty rules, blacklist thresholds)
-   - View all data within their organization
-   - Cannot create borrowers (delegated to Staff)
+### 6.1 Identity & Access (Global Accounts)
 
-3. **Staff (Instance Manager)**
-   - Manage items within assigned instances (CRUD operations)
-   - Create/enable/disable **Borrowers** for their instances
-   - Process lending/returns/reservations
-   - Apply penalties and override blacklists within their instances
-   - Attach files to item records
+1. **Single global Account** per person across all Orgs.
+2. **Memberships** grant access to specific Orgs and Instances with roles.
+3. **Login options (tenant-configurable)**:
 
-4. **Borrower**
-   - View available items in **enabled instances**
-   - Reserve/borrow items from assigned instances
-   - View personal borrowing history/penalties
-   - No access to admin features or other borrowers' data
+   * Allow **Username**, **Email**, **Local Identifier (Alias, Org-scoped)**, **External ID**—any combination chosen by the Org.
+   * Local Identifiers are unique within the Org.
+   * External ID can be **Required**, **Optional**, or **Disabled** per Org.
+4. **Invitations & onboarding**: Admin/Staff invites existing Accounts, or creates new Accounts, and those Accounts automatically become Members of the Org.
+5. **Leaving an Org**: Membership removal is done by Admin/Staff; the global Account remains if there are other active Memberships but access to that Org’s data is revoked.
 
-### User and Access Model (Conceptual)
-- One account per person across the whole system; we never recreate the same person per organization or instance.
-- Access is granted by membership, not by duplicating users:
-  - Organization membership gives a person access to that organization (with roles like Admin/Staff/Borrower as defined by policy).
-  - Instance assignment gives a person access within a specific instance of that organization.
-- Borrowing rules (simple):
-  - People can borrow only in instances where they are assigned as borrowers.
-  - Staff manage items and lending only in instances where they are assigned (organization admins can manage all instances in their org).
-- Blacklists and penalties apply within an organization and may be limited to a single instance if needed.
-- Organization‑specific profile details (e.g., local IDs, phone) can be stored per organization without changing the global account.
-- Removing someone from an organization revokes their access there but does not affect their access in other organizations.
-- Optional: allow temporary “guest borrowers” for one‑off cases, with a path to convert them into full accounts later.
+### 6.2 Tenant & Policy Management
+
+1. **Identity policy**: Which login identifiers are allowed, format rules, uniqueness, and whether External IDs are required.
+2. **Circulation policy**:
+   * Default loan periods (Org default; Instance override allowed).
+   * Renewal limits and conditions (optional).
+   * Reservation expiry.
+3. **Penalty & Blacklist policy**:
+   * Late fee calculation, replacement cost rules, caps, waivers.
+   * Blacklist duration formulas (e.g., ratio of overdue days to ban days), minimums/maximums, grace periods.
+   * Per-Instance overrides allowed if enabled by the Org.
+5. **Custom fields & labels**: Orgs can define additional fields for Items, People, Loans, Reservations and show them in lists and exports.
+6. **Policy versioning & audits**: All changes recorded with who/when/what; future-dated changes supported.
+
+### 6.3 Catalog & Inventory
+
+1. **Items**: Create, edit, delete. Optional category.
+2. **Counts**: Track `total` and `available`; keep counts consistent across operations.
+3. **Search & filter**: By name, category, and custom fields.
+4. **Bulk updates**: Optional bulk import/export for Items.
+
+### 6.4 Circulation (Loans & Reservations)
+
+1. **Borrow**:
+   * Check Membership, role, and any blacklist.
+   * Confirm availability; create Loan; reduce `available`.
+   * Set due date from policy; capture borrower contact (in Org Profile).
+2. **Return**:
+   * Mark returned; increase `available`.
+   * If overdue, apply penalties and compute blacklist using policy.
+3. **Reservation**:
+   * Create hold if available; decrement `available` during the hold.
+   * Expire automatically if not claimed; restore `available`.
+   * Convert to Loan on claim.
+4. **Lost/Damaged**:
+   * Mark Loan as lost/damaged; compute replacement or damage cost from policy; optional blacklist according to policy.
+5. **Overrides**:
+   * Admin/Staff may edit penalties/blacklists with a required reason; all changes are audited.
+
+### 6.5 Files & Attachments
+
+1. Upload files to Item records (e.g., manuals, PDFs) within Org/Instance scope.
+2. Enforce size/type limits.
+3. Access to attachments respects Roles and Memberships.
+
+### 6.6 Audit & Activity
+
+1. Record important actions: policy changes, membership changes, loans/returns, penalties, overrides, file actions.
+2. Provide search and export of audit logs to authorized users.
+
+### 6.7 Extensions & Customizations
+
+1. Tenant-scoped **feature flags** to enable/disable optional features.
+2. **Custom fields** visible in forms, lists, and exports.
+3. Lightweight hooks or notifications for simple external workflows (where enabled), without changing core behavior.
+
+### 6.8 Admin & Self-Service Portals
+
+1. **Admin**: Configure policies, manage people and memberships, define custom fields, review audits.
+2. **Staff**: Everyday operations—items, loans, returns, reservations, attachments, penalties/overrides.
+3. **Borrower**: Browse availability, reserve/borrow, view due dates, history, and penalties.
+
+---
+
+## 7) Non-Functional Requirements
+
+### 7.1 Security & Privacy
+
+* Strict Org/Instance scoping on every operation.
+* Least-privilege role access.
+* Protection of personal contact details; visibility only to authorized roles.
+* Tamper-evident audit trail.
+* Support for tenant-defined retention and anonymization.
+
+### 7.2 Performance & Scalability
+
+* Responsive experience for typical workloads (e.g., around 100 active users) without noticeable delay in common actions.
+* Predictable behavior as tenants and Instances grow, with room to scale service areas independently as needed.
+
+### 7.3 Availability & Reliability
+
+* Safe retries for transient failures and clear, actionable error messages.
+* Business-critical operations (borrow/return/reservation) keep counts correct even during failures.
+
+### 7.4 Usability
+
+* Clean, minimal screens with obvious next actions.
+* Consistent terminology and in-context help for policies and penalties.
+* Accessibility best practices followed.
+
+### 7.5 Maintainability & Extensibility
+
+* Clear separation between identity, policy, catalog, circulation, penalties, files, audits, and extensions.
+* New policies and fields can be added without disrupting existing tenants.
+* Backward-compatible changes preferred; deprecation windows for breaking changes.
+
+### 7.6 Interoperability (Basic)
+
+* Simple export/import options for items and activity where allowed by tenant policy.
+* Optional notifications or webhooks kept lightweight.
+
+---
+
+## 8) Conceptual Information Model (no schemas)
+
+* **Account (global)** ↔ **Memberships** ↔ **Org / Instance**
+* **Account (global)** ↔ **Org Profiles (per Org)**
+* **Org** → **Instances**
+* **Instance** → **Items** (optional **Categories**)
+* **Items** ↔ **Loans**, **Reservations**
+* **Loans** ↔ **Penalties**, **Blacklists** (policy-driven)
+* **Items** ↔ **Attachments**
+* **Policies** (Org defaults; Instance overrides)
+* **Audit Entries** (across all important actions)
+
+All entities reference the owning Org (and Instance where relevant) for isolation and auditing.
+
+---
+
+## 9) Key Workflows (Narrative)
+
+### 9.1 Onboarding an Organization
+
+1. SuperAdmin creates Org and initial Admin.
+2. Admin completes a **policy template**: identity options, circulation defaults, penalties/blacklist formulas, reservation rules, data retention, and any custom fields.
+3. Admin sets up Instances (e.g., “Library”, “Workshop”) and optional overrides.
+
+### 9.2 Adding People
+
+1. Admin invites a person by identifier allowed in the identity policy.
+2. If the person already has a global Account, the invitation attaches a Membership; otherwise a new global Account is created.
+3. Admin assigns roles at Org and relevant Instances; optional Local Identifiers and External IDs are set per policy.
+
+### 9.3 Item Lifecycle
+
+1. Staff creates an Item with counts and optional category.
+2. Staff may adjust counts (e.g., new stock); lists and searches reflect changes immediately.
+
+### 9.4 Borrow / Return
+
+1. Staff initiates a borrow: eligibility, availability, and blacklist checked automatically.
+2. Loan is created with due date; `available` decreases.
+3. On return, the Loan is closed; `available` increases. If overdue, the system computes penalties and blacklist per policy.
+
+### 9.5 Reservation
+
+1. Borrower or Staff places a reservation if availability exists; a temporary hold is created.
+2. If not claimed in time, the hold expires and availability is restored.
+3. On claim, the reservation converts to a Loan seamlessly.
+
+### 9.6 Lost / Damaged
+
+1. Staff marks a Loan as lost or damaged; the system computes replacement or damage cost and applies blacklist rules if configured.
+
+### 9.7 Overrides & Appeals
+
+1. Admin/Staff may override a penalty or blacklist with a reason; the change is fully audited for later review.
+
+### 9.8 Leaving an Org
+
+1. Membership removals take effect immediately; access ends.
+2. Org Profile is **removed** if there's no other active Membership; otherwise, it is preserved.
+
+---
+
+## 10) Business Rules (Configurable)
+
+* **Identity**: Allowed login identifiers; uniqueness scope for usernames; Local Identifier format and uniqueness per Org; External ID requirement.
+* **RBAC**: Admin role includes Staff privileges across all Instances in their Org by default; optional Org policy can require explicit Staff assignment for operational actions.
+* **Loan periods**: Defaults by Org; optional per-Instance overrides.
+* **Reservations**: Expiry times, pickup windows, queue limits.
+* **Penalties**: Late fee formulas, rounding rules, maximum caps, waivers.
+* **Blacklist**: Duration scaling (e.g., X days late → Y days banned), grace periods, minimum/maximum thresholds, per-Instance overrides if enabled.
+* **Counts**: All circulation events must leave counts correct.
+* **Data retention**: Preserve, anonymize, or remove Org Profile data on exit.
+* **Auditing**: Every policy change, override, and identity event must be recorded with actor, target, timestamp, and reason when applicable.
+
+---
+
+## 11) User Experience Requirements
+
+* Clear indicator of the **current Org and Instance**, with a simple switcher when a user has multiple.
+* Lists for Items, Loans, Reservations with inline editing for frequent actions (e.g., count updates, quick category add).
+* Prominent status badges for due dates, overdue, penalties, and blacklist.
+* Admin screens group policy settings by topic (Identity, Circulation, Penalties, Reservations, Retention).
+* Helpful, plain-language explanations and examples for policy fields (e.g., “1 overdue day = 3 ban days”).
+* Consistent empty states, confirmations, and undo/rollback where safe.
+
+---
+
+## 12) SaaS Operating Model
+
+### 12.1 Tenant Onboarding
+
+* Guided setup wizard covering identity options, circulation defaults, penalties/blacklist, reservation rules, retention choices, custom fields, and branding.
+
+### 12.2 Handling Feature Requests
+
+* Prefer adding **policy options**, **custom fields**, or **extension hooks** instead of code changes.
+* When changes are needed, introduce them as optional features that default off, with clear migration notes.
+
+### 12.3 Versioning & Change Management
+
+* Policy changes can be future-dated and are always audited.
+* Product changes strive for backward-compatible behavior; deprecations include a grace period and communication.
+
+### 12.4 Support & Service Levels (Conceptual)
+
+* Defined channels for issue reporting and status updates.
+* Clear expectations for response times and resolution targets (details set by the SaaS operator).
+
+---
+
+## 13) Acceptance Criteria (with Security Considerations)
+
+1. **Single Global Account**
+
+   * Inviting someone who already has an Account attaches a Membership, not a duplicate.
+   * Merges are available for legacy duplicates with full audit.
+
+2. **Identity Options Work as Configured**
+
+   * Per-Org login accepts only the allowed identifiers (Username, Email, Local Identifier, External ID).
+   * Username uniqueness and Local Identifier rules are enforced correctly.
+
+3. **Isolation**
+
+   * A user can only see data for Orgs/Instances where they have Memberships.
+   * Attempts to access other tenants’ data are blocked and audited.
+
+4. **Circulation Correctness**
+
+   * Borrow/Return/Reservation keep counts correct at all times.
+   * Due dates reflect policy; renewal limits and reservation expiry behave as configured.
+
+5. **Penalties & Blacklists**
+
+   * Overdue calculations match the policy; blacklist durations scale correctly and respect minimums/maximums and grace periods.
+   * Overrides are restricted to authorized roles and always audited.
+
+6. **Reservations**
+
+   * Holds reduce availability; expiration restores it; conversion to Loan does not create conflicts.
+
+7. **Files**
+
+   * Attachments obey size/type limits and are visible only within the correct Org/Instance and roles.
+
+8. **Retention**
+
+   * On leaving an Org, the chosen policy (preserve/anonymize/remove) is executed and recorded.
+
+9. **Usability**
+
+   * Users can complete core tasks (borrow, return, reserve, manage items) without training, using on-screen guidance.
+   * Policy screens are understandable and validated with examples.
+
+10. **Auditability**
+
+* Identity events, policy changes, overrides, and sensitive actions are traceable end-to-end.
+
+---
+
+## 14) Out of Scope (MVP)
+
+* Payments and invoicing for penalties or fees.
+* Advanced analytics dashboards.
+* Mobile applications.
+* Complex third-party integrations beyond basic exports or lightweight notifications.
+
+---
+
+## 15) Risks & Mitigations
+
+* **Policy Complexity**: Too many options may confuse tenants → Provide sensible defaults, examples, and inline guidance.
+* **Duplicate Legacy Users**: Past systems may contain duplicates → Provide a safe merge process with audit.
+* **Disputes on Penalties**: Users may contest outcomes → Keep transparent policy history and require reasons for overrides.
+* **Data Retention Variability**: Different jurisdictions impose different rules → Allow per-Org retention choices and document them.
+
+---
+
+## 16) Appendices
+
+### 16.1 Policy Template (Starter)
+
+* **Identity**:
+
+  * Allowed login identifiers: ☐ Username ☐ Email ☐ Local Identifier ☐ External ID (Required ☐ / Optional ☐ / Disabled ☐)
+  * Username scope: ☐ Global unique
+  * Local Identifier format (example): `[a-z0-9_]{4,20}`
+
+* **Circulation**:
+
+  * Default loan days: \_\_\_; Renewal limit: \_\_\_; Renewal conditions: \_\_\_\_\_\_\_\_\_\_
+  * Reservation expiry (hours/days): \_\_\_; Pickup window: \_\_\_
+
+* **Penalties & Blacklist**:
+
+  * Late fee: \_\_\_\_\_\_\_\_\_\_; Replacement cost method: \_\_\_\_\_\_\_\_\_\_; Caps: \_\_\_\_\_\_\_\_\_\_
+  * Blacklist: `ban_days = overdue_days × ___` (min \_\_\_ / max \_\_\_); Grace: \_\_\_ days
+
+* **Retention**:
+
+  * Borrower self-request allowed: ☐ Yes ☐ No
+
+* **Custom Fields**:
+
+  * Items: \[Field name → type/choices]
+  * People: \[Field name → type/choices]
+  * Loans/Reservations: \[Field name → type/choices]
+
+### 16.2 Onboarding Checklist
+
+1. Create Org and initial Admin.
+2. Complete policy template and set any Instance overrides.
+3. Define roles and membership rules.
+4. Add Items (optionally import).
+5. Invite Staff and Borrowers; assign roles and, if applicable, Local Identifiers/External IDs.
+6. Test borrow/return/reservation, penalties, and blacklist with sample data.
+7. Review audit and retention behaviors.

@@ -11,6 +11,7 @@
   - Clarified borrowing constraints and blacklist scoping
   - Added data isolation, deactivation, and guest borrower guidance
  - SRS: Simplified identity model wording for clarity (concept-only)
+ - SRS: Clarified role inheritance (Admin includes Staff) and the single-user organization scenario; added auditing note and optional separation-of-duties policy toggle.
  - Auth service: Align with Role/Access model
    - Added env-based SuperAdmin (SUPERADMINS=email1,email2) surfaced as `isSuperAdmin` in JWT/`/me`
    - New endpoints: `GET /auth/contexts` (list org+instances), `POST /auth/context` (switch instance, new JWT)
