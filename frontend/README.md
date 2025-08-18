@@ -92,6 +92,54 @@ Additional options:
 * **Custom Fields** – Optional, key/value pairs (dynamic).
 * **Notes** – Optional, text area for staff notes.
 
+### 5. Quick Loan Form
+* **Borrower** – Required, search/select from existing users.
+* **Item** – Pre-filled with the item being loaned.
+* **Due Date** – Optional, default to Org policy (e.g. 14 days) with preset options that user can choose or create on the spot.
+* **Condition Out** – Optional, select from predefined list (New, Good, Fair, Poor, Damaged) if it's already set then pre-filled.
+* **Notes** – Optional, text area for staff notes.
+
+## Users Table Columns
+
+### 1. Default Visible Columns (core workflow)
+* **Name** – Display name (from global account).
+* **Email** – Primary email.
+* **Password** – Password status (if unset show "—").
+* **Overdue Loans/Active Loans** – Count of currently active (not returned) loans count of loans currently overdue (highlight if >0).
+* **User ID** – Optional - if unset show "—".
+* **Username** – Optional - if unset show "—".
+* **Actions** – View / Delete (removes user from this instance with check for active loans)
+
+### 2. Common Optional Columns (toggle)
+* **Blacklist Status** – None / Temp (until date) / Permanent (icon + tooltip).
+* **Phone** – Optional Contact number (if collected) - if unset show "—".
+* **Instances** – Organization + Instances user has access to (comma-separated list) (read-only)
+* **The history of loans (no relation, entries only)** – Cumulative completed loans count.
+* **Notes** – Internal staff notes (truncate with tooltip).
+* **Created At** – When user joined Org (invited or provisioned).
+
+### 4. Sorting & Filtering
+Common filters:
+* Blacklist Status (None, Temp, Permanent)
+
+### 6. Export / Import
+* Export includes visible columns by default; Admin can opt to include sensitive fields (email, phone) via explicit toggle.
+* Import (batch add/update):
+  * Validation summary returned (success count, failed count, sample errors).
+
+### 7. Create Form + Edit Form
+* **Name** – Required, unique within Org.
+* **Email** – Required, unique within Org.
+* **Username** – Optional, unique within Org.
+* **Phone** – Optional, unique within Org.
+* **Password** – Required for new users.
+* **Role** – Required, select from predefined list (Admin, Staff, User).
+* **Instances** – Optional, select from available Orgs/Instances (if multi‑tenant).
+* **Notes** – Optional, text area for internal staff notes.
+* **Custom Fields** – Optional, key/value pairs (dynamic).
+
+
+
 # User Settings
 ### By Default
 **Sound cues** for success/error during borrow/return. (Reduces eyes-on-screen time for high-throughput desks.)
@@ -107,5 +155,6 @@ Additional options:
 **Admin** decide to enable/disable sound cues for all users in the Org. (Admins can override the global setting for their Org.)
 **Staff**: When processing an overdue return (via the Return action), staff can: (a) temporarily blacklist the user until a specified payment is received, (b) extend/override the due date, (c) accept the return with no penalty, (d) apply a time-limited blacklist, or (e) permanently blacklist the user with an accompanying note.
 The max number of renewals allowed for a loan.
+The max number of loans allowed for a user.
 
 ---
