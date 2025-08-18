@@ -1,6 +1,5 @@
 import { ThemeProvider } from "@/components/theme-provider"
 import { useEffect, useState } from "react"
-import { ThemeToggle } from "./components/ui/theme-toggle"
 import { DataTable } from "./components/data-table"
 import { Toaster } from "sonner"
 import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react"
@@ -670,7 +669,7 @@ function App() {
                   user={{ name: "Jane Doe", email: "jane@example.com", avatar: "https://avatar.vercel.sh/jane" }}
                   onLogout={() => setIsAuthed(false)}
                 />
-                <ThemeToggle />
+                {/*<ThemeToggle />*/}
               </div>
             </div>
           </header>

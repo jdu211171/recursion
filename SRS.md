@@ -284,7 +284,6 @@ All entities reference the owning Org (and Instance where relevant) for isolatio
 * **Penalties**: Late fee formulas, rounding rules, maximum caps, waivers.
 * **Blacklist**: Duration scaling (e.g., X days late → Y days banned), grace periods, minimum/maximum thresholds, per-Instance overrides if enabled.
 * **Counts**: All circulation events must leave counts correct.
-* **Data retention**: Preserve, anonymize, or remove Org Profile data on exit.
 * **Auditing**: Every policy change, override, and identity event must be recorded with actor, target, timestamp, and reason when applicable.
 
 ---
