@@ -140,6 +140,55 @@ Common filters:
 
 
 
+## Blacklist View (Users‑filtered)
+
+This view appears when the entity selector is set to “blacklist”. It is a projection of the Users table filtered to entries where the user has an active blacklist in the selected Instance. Rows are users enriched with fields from their latest active blacklist entry.
+
+### 1. Default Visible Columns (core workflow)
+* **Name** – From Users (display name).
+* **Email** – From Users (primary email).
+* **Blacklist Status** – Temp (until date) / Permanent (badge).
+* **Ban Until** – End timestamp ("—" for permanent).
+* **Instance** – Instance where the blacklist applies (if multi‑tenant).
+* **Actions** – Edit (End Now, View Loan (if linked))
+
+### 2. Common Optional Columns (toggle)
+* **Username / User ID** – From Users.
+* **Linked Loan** – Related loan when applicable (from Loans table).
+* **Source** – Overdue, Lost/Damaged, Manual.
+* **Reason** – Short reason or code (tooltip for longer notes).
+* **Overdue Days** – Source is Overdue.
+* **Created By** – Staff who created/overrode (from Users table).
+* **Updated At** – Last modification timestamp.
+* **Notes** – Internal notes (truncate with tooltip).
+
+### 3. Sorting & Filtering
+Quick filters: **Status** (Active only by default, toggle to include Expired), **Instance**, **Source**, date ranges (**Ban Start**, **Ban Until**), **Has Linked Loan**.
+
+### 4. Batch Actions (for selected rows)
+* **End Now** – Immediately end blacklist for selected users (requires reason; audited).
+* **Export CSV** – Export current view or selected rows with visible columns.
+
+### 5. Edit Form (Blacklist)
+Opens from “Edit Blacklist” or batch actions. Operates on the user’s active blacklist for the selected Instance (creates one if none exists).
+
+Fields:
+* **Borrower** (read‑only) – The user (from Users table).
+* **Instance** (read‑only) – Current instance context.
+* **Source** – Overdue, Lost/Damaged, Manual (required).
+* **Linked Loan** – Optional select (from Loans table); required if Source is Overdue or Lost/Damaged.
+* **Duration Presets** – +7d, +14d, +30d, **Permanent** (buttons).
+* **Ban Until** – Date/time; prefilled from policy; editable within bounds ("—" if Permanent).
+* **Reason** – Required explanation for create/changes.
+* **Notes** – Optional additional context (stored for audit).
+* **Policy Hints** (display‑only) – Shows applied multiplier, grace days, and min/max caps.
+
+Validation & audit:
+* Enforce policy bounds (grace days, min/max). Require **Reason** for create/update/end. All changes are audited with actor, timestamp.
+
+Form actions: **Save**, **End Now** (sets Ban Until to now), **Cancel**.
+
+
 # User Settings
 ### By Default
 **Sound cues** for success/error during borrow/return. (Reduces eyes-on-screen time for high-throughput desks.)
