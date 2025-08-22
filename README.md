@@ -11,7 +11,7 @@ A scalable borrowing and lending platform built with microservices architecture,
 - **File Storage**: Secure document attachments with MinIO
 - **API Gateway**: Nginx-based routing with rate limiting and CORS
 
-## 🏗️ Architecture
+## 🏗️ Architecture 
 
 ```
 ┌─────────────┐     ┌─────────────────┐
